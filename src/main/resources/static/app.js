@@ -51,6 +51,8 @@ function cardInfoResponseHandle(cardInfoResponse) {
     cardDisconnect();
     buttonsAndFieldsEnable();  
     setConnectedStatus("Success");
+    //if success
+    $( "#cardRefillButton" ).prop("disabled", false);
 }
 
 function setConnectedStatus(status) {
@@ -66,13 +68,14 @@ function buttonsAndFieldsDisable() {
 function buttonsAndFieldsEnable() {
     $( "#resetButton" ).prop("disabled", false);
     $( "#cardInfoRequestButton" ).prop("disabled", false);
-    $( "#cardRefillButton" ).prop("disabled", false);
+//    $( "#cardRefillButton" ).prop("disabled", false);
 }
 
 $(function () {
     $("form").on('submit', function (e) {
         e.preventDefault();
     });
+    $( "#cardRefillButton" ).prop("disabled", true);
     $( "#cardInfoRequestButton" ).click(function() { cardInfoRequest(); });
 });
 
