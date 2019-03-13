@@ -19,7 +19,7 @@ function cardConnect() {
         if(messageType === MessageTypeEnum.CARD_INFO_REQUEST) {
             sendCardInfoRequest();
         } else if(messageType === MessageTypeEnum.REFILL_REQUEST) {
-
+            sendCardRefillRequest();
         };
     });
 }
@@ -41,13 +41,35 @@ function cardInfoRequest() {
     cardConnect();  
 }
 
+function cardRefillRequest() {
+    messageType = MessageTypeEnum.REFILL_REQUEST;
+    buttonsAndFieldsDisable();    
+    cardConnect();  
+}
+
 function sendCardInfoRequest() {
     stompClient.send("/app/cardinfo", {}, JSON.stringify({'cardNumber': $("#cardNumberInput").val()}));
+}
+
+function sendCardRefillRequest() {
+    stompClient.send("/app/cardrefill", {}, JSON.stringify({
+                'cardNumber': $("#cardNumberInput").val(), 
+                'sum': $("#refillingSumInput").val()}));
 }
 
 function cardInfoResponseHandle(cardInfoResponse) {    
     $("#cardInfoTextArea").empty();
     $("#cardInfoTextArea").append(JSON.parse(cardInfoResponse.body).cardInfoText);
+    cardDisconnect();
+    buttonsAndFieldsEnable();  
+    setConnectedStatus("Success");
+    //if success
+    $( "#cardRefillButton" ).prop("disabled", false);
+}
+
+function cardRefillResponseHandle(cardRefillResponse) {    
+    $("#cardInfoTextArea").empty();
+    $("#cardInfoTextArea").append(JSON.parse(cardRefillResponse.body).cardInfoText);
     cardDisconnect();
     buttonsAndFieldsEnable();  
     setConnectedStatus("Success");
@@ -77,5 +99,6 @@ $(function () {
     });
     $( "#cardRefillButton" ).prop("disabled", true);
     $( "#cardInfoRequestButton" ).click(function() { cardInfoRequest(); });
+    $( "#cardRefillButton" ).click(function() { cardRefillRequest(); });
 });
 

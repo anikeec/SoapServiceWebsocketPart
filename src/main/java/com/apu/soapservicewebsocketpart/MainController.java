@@ -31,4 +31,15 @@ public class MainController {
         return new CardInfoResponse("Card number is " + HtmlUtils.htmlEscape(request.getCardNumber()) + "!");
     }
     
+    @MessageMapping("/cardrefill")
+    @SendTo("/topic/greetings")
+    public CardRefillResponse refillCard(CardRefillRequest request) throws Exception {
+        Thread.sleep(1500); // simulated delay
+        return new CardRefillResponse("Card number " 
+                + HtmlUtils.htmlEscape(request.getCardNumber()) 
+                + " filled succesfully on "
+                + HtmlUtils.htmlEscape(request.getSum())
+                + " grn.");
+    }
+    
 }
