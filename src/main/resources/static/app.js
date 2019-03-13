@@ -3,7 +3,7 @@ var socket = null;
 var MessageTypeEnum = {"NONE":0, "CARD_INFO_REQUEST":1, "REFILL_REQUEST":2};
 var messageType = MessageTypeEnum.NONE;
 
-function cardConnect() {
+function cardProcess() {
     socket = new SockJS('/gs-guide-websocket');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
@@ -38,13 +38,13 @@ function cardDisconnect() {
 function cardInfoRequest() {
     messageType = MessageTypeEnum.CARD_INFO_REQUEST;
     buttonsAndFieldsDisable();    
-    cardConnect();  
+    cardProcess();  
 }
 
 function cardRefillRequest() {
     messageType = MessageTypeEnum.REFILL_REQUEST;
     buttonsAndFieldsDisable();    
-    cardConnect();  
+    cardProcess();  
 }
 
 function sendCardInfoRequest() {
