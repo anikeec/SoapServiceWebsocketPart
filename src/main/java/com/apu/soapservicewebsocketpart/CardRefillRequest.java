@@ -11,13 +11,16 @@ package com.apu.soapservicewebsocketpart;
  */
 public class CardRefillRequest {
     
+    private final String packetType;
     private String cardNumber;
     private String sum;
 
     public CardRefillRequest() {
+        this.packetType = PacketType.CARD_REFILL_REQUEST;
     }
 
     public CardRefillRequest(String cardNumber, String sum) {
+        this();
         this.cardNumber = cardNumber;
         this.sum = sum;
     }
@@ -28,6 +31,10 @@ public class CardRefillRequest {
 
     public String getSum() {
         return sum;
+    }
+
+    public String getPacketType() {
+        return packetType;
     }
     
 }

@@ -11,17 +11,24 @@ package com.apu.soapservicewebsocketpart;
  */
 public class CardInfoRequest {
     
+    private final String packetType;
     private String cardNumber;
 
     public CardInfoRequest() {
+        this.packetType = PacketType.CARD_INFO_REQUEST;
     }
 
     public CardInfoRequest(String cardNumber) {
+        this();
         this.cardNumber = cardNumber;
     }
 
     public String getCardNumber() {
         return cardNumber;
+    }
+
+    public String getPacketType() {
+        return packetType;
     }
     
 }

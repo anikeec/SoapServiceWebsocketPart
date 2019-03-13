@@ -11,17 +11,24 @@ package com.apu.soapservicewebsocketpart;
  */
 public class CardInfoResponse {
     
+    private final String packetType;
     private String cardInfoText;
 
     public CardInfoResponse() {
+        this.packetType = PacketType.CARD_INFO_RESPONSE;
     }
 
     public CardInfoResponse(String cardInfoText) {
+        this();
         this.cardInfoText = cardInfoText;
     }
 
     public String getCardInfoText() {
         return cardInfoText;
+    }
+
+    public String getPacketType() {
+        return packetType;
     }
     
 }
