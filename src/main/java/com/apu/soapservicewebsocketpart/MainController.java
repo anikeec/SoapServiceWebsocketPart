@@ -24,4 +24,11 @@ public class MainController {
         return new Greeting("Hello, " + HtmlUtils.htmlEscape(message.getName()) + "!");
     }
     
+    @MessageMapping("/cardinfo")
+    @SendTo("/topic/greetings")
+    public CardInfoResponse getCardInfo(CardInfoRequest request) throws Exception {
+        Thread.sleep(1000); // simulated delay
+        return new CardInfoResponse("Card number is " + HtmlUtils.htmlEscape(request.getCardNumber()) + "!");
+    }
+    
 }

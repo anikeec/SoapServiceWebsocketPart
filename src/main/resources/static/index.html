@@ -45,29 +45,31 @@
                       <label for="refillingSumInput">Refilling sum</label>
                       <input type="number" class="form-control" id="refillingSumInput" placeholder="Refilling sum" required="">
                     </div>
-                    <button type="reset" class="btn btn-danger">
+                    <button type="reset" class="btn btn-danger" id="resetButton">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Reset
                     </button>
-                    <button type="submit" class="btn btn-primary" id="submitButton">
-                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Query/Refilling
+                    <button type="submit" class="btn btn-info" id="cardInfoRequestButton">
+                        <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Query
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="cardRefillButton">
+                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Refill
                     </button>
                 </form>
             </div>
             <div class="col-md-1  col-sm-1"></div>
             <div class="col-md-7  col-sm-4">
                 <div class="form-group">
-                  <label for="cardInfo">Card info</label>
-                  <textarea class="form-control" id="cardInfo" rows="3"></textarea>
+                  <label for="cardInfoTextArea">Card info</label>
+                  <textarea class="form-control" id="cardInfoTextArea" rows="3" readonly=""></textarea>
                 </div>
                 <div class="form-group">
                   <label for="operationResult" id="operationResultLabel">Result</label>
-                  <input type="text" class="form-control" id="operationResult">
+                  <input type="text" class="form-control" id="operationResult" readonly>
                 </div>
             </div>
-        </div>
+        </div>       
         
-        
-        <div class="row">
+<!--        <div class="row">
             <div class="col-md-6">
                 <form class="form-inline">
                     <div class="form-group">
@@ -100,7 +102,7 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+        </div>-->
     </div>
     <script src="/webjars/jquery/jquery.min.js"></script>
     <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
