@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello WebSocket</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/main.css" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" rel="stylesheet" crossorigin="anonymous">    
+</head>
+<body>
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
+    enabled. Please enable
+    Javascript and reload this page!</h2></noscript>
+    <div id="main-content" class="container">
+        <nav class="navbar navbar-default">
+            <div id="mainNavbar" class="container-fluid">
+              <!-- Brand and toggle get grouped for better mobile display -->
+              <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#"><i class="fas fa-bus-alt"></i></a>
+              </div>
+
+              <!-- Collect the nav links, forms, and other content for toggling -->
+              <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                  <li class="active"><a href="#">Refill <span class="sr-only">(current)</span></a></li>
+                  <li><a href="#">Production</a></li>
+                </ul>
+              </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav>
+
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                <form>
+                    <div class="form-group">
+                      <label for="cardNumberInput">Card number</label>
+                      <input type="number" class="form-control" id="cardNumberInput" placeholder="Card number" required="">
+                    </div>
+                    <div class="form-group">
+                      <label for="refillingSumInput">Refilling sum</label>
+                      <input type="number" class="form-control" id="refillingSumInput" placeholder="Refilling sum" required="">
+                    </div>
+                    <button type="reset" class="btn btn-danger">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Reset
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitButton">
+                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Query/Refilling
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-1  col-sm-1"></div>
+            <div class="col-md-7  col-sm-4">
+                <div class="form-group">
+                  <label for="cardInfo">Card info</label>
+                  <textarea class="form-control" id="cardInfo" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="operationResult" id="operationResultLabel">Result</label>
+                  <input type="text" class="form-control" id="operationResult">
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="row">
+            <div class="col-md-6">
+                <form class="form-inline">
+                    <div class="form-group">
+                        <label for="connect">WebSocket connection:</label>
+                        <button id="connect" class="btn btn-default" type="submit">Connect</button>
+                        <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Disconnect
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <form class="form-inline">
+                    <div class="form-group">
+                        <label for="name">What is your name?</label>
+                        <input type="text" id="name" class="form-control" placeholder="Your name here...">
+                    </div>
+                    <button id="send" class="btn btn-default" type="submit">Send</button>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <table id="conversation" class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Greetings</th>
+                    </tr>
+                    </thead>
+                    <tbody id="greetings">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/app.js"></script>
+</body>
+</html>
