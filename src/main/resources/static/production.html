@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello WebSocket</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/main.css" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" rel="stylesheet" crossorigin="anonymous">    
+</head>
+<body>
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
+    enabled. Please enable
+    Javascript and reload this page!</h2></noscript>
+    <div id="main-content" class="container">
+        <nav class="navbar navbar-default">
+            <div id="mainNavbar" class="container-fluid">
+              <!-- Brand and toggle get grouped for better mobile display -->
+              <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#"><i class="fas fa-bus-alt"></i></a>
+              </div>
+
+              <!-- Collect the nav links, forms, and other content for toggling -->
+              <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                  <li><a href="index.html">Refill</a></li>
+                  <li class="active"><a href="production.html">Production<span class="sr-only">(current)</span></a></li>
+                </ul>
+              </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav>
+
+        <div class="row">
+            <div class="col-md-6 col-sm-12">                
+                <div class="table-wrapper-scroll-y my-custom-scrollbar" style="height: 300pt; overflow: auto; border: solid lightgrey;">
+                    <table class="table table-bordered table-striped mb-0" id="cardTable">
+                        <thead>
+                            <tr>
+                              <th scope="col" class="col-md-1 col-sm-1">
+                                  <input type="checkbox" id="selectAllCardsCheckbox">
+                              </th>
+                              <th scope="col" class="col-md-4 col-sm-4">Card number</th>
+                              <th scope="col" class="col-md-7 col-sm-7">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                              <td scope="col" class="col-md-1 col-sm-1">
+                                  <input type="checkbox" id="selectAllCardsCheckbox">
+                              </td>
+                              <td scope="col" class="col-md-4 col-sm-4">Card number</td>
+                              <td scope="col" class="col-md-7 col-sm-7">Status</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-1  col-sm-1"></div>
+            <div class="col-md-5  col-sm-10">
+                <form>
+                    <label for="productionListSelector">Production list:</label>
+                    <div class="form-group">                        
+                        <select class="form-control" style="width: 160px; float:left; margin-right: 10px; " 
+                                name="productionListSelector" id="productionListSelector" >
+                        </select>
+                        <button type="submit" class="btn btn-default" id="productionListLoadFromDbButton">
+                            Load
+                        </button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cardListInputFile">Card list:</label>
+                        <input type="file" id="cardListInputFile">
+                        <p class="help-block">File with card list (*.txt)</p>                    
+                        <button type="submit" class="btn btn-default" id="cardListLoadFromFileButton">Load from file</button>
+                        <button type="submit" class="btn btn-default" id="cardListLoadFromDbButton">Load from DB</button>
+                    </div>
+                    <div class="form-group">
+                      <label for="operationResultProduction" id="operationResultLabel">Result</label>
+                      <textarea class="form-control" id="operationResultProduction" rows="8" readonly=""></textarea>
+                    </div>
+
+                    <button type="reset" class="btn btn-danger" id="cardListResetButton">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Reset
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="cardListRefillButton">
+                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Refill cards
+                    </button>
+                </form>                
+            </div>
+        </div>       
+        
+    </div>
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/production.js"></script>
+</body>
+</html>

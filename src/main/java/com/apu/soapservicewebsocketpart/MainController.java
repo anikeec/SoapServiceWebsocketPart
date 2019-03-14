@@ -5,6 +5,8 @@
  */
 package com.apu.soapservicewebsocketpart;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
@@ -39,6 +41,42 @@ public class MainController {
                 + " filled succesfully on "
                 + HtmlUtils.htmlEscape(request.getSum())
                 + " grn.");
+    }
+    
+    @MessageMapping("/productionlist")
+    @SendTo("/topic/greetings")
+    public ProductionListResponse getProductionList(ProductionListRequest request) throws Exception {
+        if(request.getPacketType().equals(PacketType.PRODUCTION_LIST_REQUEST) == false) {
+            //error
+        }
+        Thread.sleep(1000); // simulated delay
+        List<String> productionList = new ArrayList<>();
+        productionList.add("First production");
+        productionList.add("Second production");
+        return new ProductionListResponse(productionList);
+    }
+    
+    @MessageMapping("/cardlist")
+    @SendTo("/topic/greetings")
+    public CardListResponse getCardList(CardListRequest request) throws Exception {
+        if(request.getPacketType().equals(PacketType.CARD_LIST_REQUEST) == false) {
+            //error
+        }
+        Thread.sleep(1000); // simulated delay
+        List<Card> fullCardList = new ArrayList<>();
+        fullCardList.add(new Card("1111", "First production"));
+        fullCardList.add(new Card("1212", "First production"));
+        fullCardList.add(new Card("1313", "Second production"));
+        
+        String production = request.getProduction();
+        List<Card> cardList = new ArrayList<>();
+        for(Card card:fullCardList) {
+            if(card.getProduction().equals(production)) {
+                cardList.add(card);
+            }
+        }
+        
+        return new CardListResponse(cardList);
     }
     
 }
