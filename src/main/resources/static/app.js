@@ -52,13 +52,13 @@ function cardRefillRequest() {
 
 function sendCardInfoRequest() {
     stompClient.send("/app/cardinfo", {}, JSON.stringify({
-                'packetType': 'CardInfoResponse',
+                'packetType': 'CardInfoRequest',
                 'cardNumber': $("#cardNumberInput").val()}));
 }
 
 function sendCardRefillRequest() {
     stompClient.send("/app/cardrefill", {}, JSON.stringify({
-                'packetType': 'CardRefillResponse',
+                'packetType': 'CardRefillRequest',
                 'cardNumber': $("#cardNumberInput").val(), 
                 'sum': $("#refillingSumInput").val()}));
 }
