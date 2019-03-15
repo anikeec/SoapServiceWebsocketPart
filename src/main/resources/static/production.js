@@ -92,7 +92,12 @@ function cardDisconnect() {
 }
 
 function setConnectedStatus(status) {
-    $("#connectionState").val(status);    
+    var conStateLoggingElement = $("#connectionStateLog"); 
+    if(conStateLoggingElement.val() !== '') {
+        status = '\n' + status;
+    };
+    conStateLoggingElement.append(status); 
+    conStateLoggingElement.scrollTop(conStateLoggingElement[0].scrollHeight);
 }
 
 function resetButtonHandler() {

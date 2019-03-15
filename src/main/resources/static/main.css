@@ -20,6 +20,7 @@ body {
 
 textarea {
    resize: none;
+   overflow-y: scroll;
 }
 
 /*#submitButton {
