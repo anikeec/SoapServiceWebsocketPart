@@ -9,12 +9,14 @@ var MessageTypeEnum = {
             };
 var messageType = MessageTypeEnum.NONE;
 var StateEnum = {
-                "ST_INIT":0, 
-                "ST_ERROR":1, 
-                "ST_CARD_LIST_REQ_SENT":2, 
-                "ST_CARD_LIST_RECEIVED":3,
-                "ST_PRODUCTION_LIST_REQ_SENT":4, 
-                "ST_PRODUCTION_LIST_RECEIVED":5
+                "ST_INIT":0,                
+                "ST_CARD_LIST_REQ_SENT":1, 
+                "ST_CARD_LIST_RECEIVED":2,
+                "ST_CARD_REFILL_REQ_SENT":3, 
+                "ST_CARD_REFILLED":4,
+                "ST_PRODUCTION_LIST_REQ_SENT":5, 
+                "ST_PRODUCTION_LIST_RECEIVED":6,
+                "ST_ERROR":7 
             };
 var state = StateEnum.ST_INIT;
 var recInterval = null;
@@ -60,6 +62,8 @@ function cardProcess() {
                 cardListResponseHandle(response);
             } else if(messageType === MessageTypeEnum.PRODUCTION_LIST_REQUEST) {
                 productionListResponseHandle(response);
+            } else if(messageType === MessageTypeEnum.REFILL_REQUEST) {
+                cardRefillResponseHandle(response);
             };
         });
         if(messageType === MessageTypeEnum.CARD_LIST_REQUEST) {
@@ -68,6 +72,9 @@ function cardProcess() {
         } else if(messageType === MessageTypeEnum.PRODUCTION_LIST_REQUEST) {
             sendProductionListRequest();
             state = StateEnum.ST_PRODUCTION_LIST_REQ_SENT;
+        } else if(messageType === MessageTypeEnum.REFILL_REQUEST) {
+            sendCardRefillRequest(cardNumberForRefill);
+            state = StateEnum.ST_CARD_REFILL_REQ_SENT;
         };
         modifyElementsAccordingToState(state);
     }, function(error) {
@@ -141,6 +148,12 @@ function modifyElementsAccordingToState(state) {
                                 $("#cardListRefillButton").prop("disabled", false);
                                 $("#productionListLoadFromDbButton").prop("disabled", false);
                                 break;
+        case StateEnum.ST_CARD_REFILL_REQ_SENT:
+                                
+                                break;
+        case StateEnum.ST_CARD_REFILLED:
+                                
+                                break;
         case StateEnum.ST_ERROR:
         default:
                                 $("#cardListResetButton").prop("disabled", true);
@@ -213,10 +226,12 @@ function cardListResponseHandle(cardListResponse) {
 }
 
 function insertTableItem(id, cardnumber) {
-    var html = '<tr><td><input type="checkbox" class="cardCheckbox"  id="cardCheckbox' 
-            + cardnumber + '"></td>'
-            + '<td>' + cardnumber  
-            + '</td><td>' + '' + '</td></tr>';
+    var html = '<tr>' 
+            + '<td scope="col" class="col-md-1 col-sm-1">' 
+            + '<input type="checkbox" class="cardCheckbox"  id="cardCheckbox' + cardnumber + '"></td>'
+            + '<td scope="col" class="col-md-4 col-sm-4" name="tdCardNumber">' + cardnumber + '</td>' 
+            + '<td scope="col" class="col-md-7 col-sm-7" name="tdCardStatus">' + '' + '</td>'
+            + '</tr>';
     $('#cardTable > tbody:last-child').append(html);
 }
 
@@ -267,6 +282,111 @@ function insertProductionDropdownItem(id, production) {
     $("#productionListSelector").append(html);
 }
 
+//production list query end ----------------------------------------------------
+
+
+// card list refilling process -------------------------------------------------
+/*
+ * I have to refill all selected elements from table
+ * at-first I have to parse table and convert it to card array
+ * for each element:
+ *  I have to create refilling query and setTimeout
+ *  when timeout has finished I have marked card with error status
+ *  if answer received, I marked card with success status and go forward to other cards
+ * until last element (count table size???)
+*/
+var tableAmountRowsAll = null;
+var cardListCardNumberArray = null;
+var cardListStatusArray = null;
+var cardListArrayPtr = 0;
+var cardListArrayHandlingPtr = 0;
+var cardNumberForRefill = null;
+
+function cardTableHandleCheckedRow(row) {
+//    console.log('Element checked');
+    cardListCardNumberArray[cardListArrayPtr] = row.find('td[name="tdCardNumber"]').text();
+    cardListStatusArray[cardListArrayPtr] = row.find('td[name="tdCardStatus"]');
+//    cardListStatusArray[cardListArrayPtr].html('Send request');
+//    console.log(cardListCardNumberArray[elementArrayPtr]);
+    cardListArrayPtr++;
+}
+
+var cardTableCheckedRowsAmount = 0;
+var cardTableCountCheckedRowsFunc = function cardTableCountCheckedRows(index, element) {
+    if($(element).find('input[type="checkbox"]').is(':checked')) {        
+        cardTableCheckedRowsAmount++;
+    }
+};
+
+var cardTableHandleRowFunc = function cardTableHandleRow(index, element) {
+    var colSize = $(element).find('td').length;
+    console.log("  Number of cols in row " + (index + 1) + " : " + colSize);
+    if($(element).find('input[type="checkbox"]').is(':checked')) {        
+        cardTableHandleCheckedRow($(element));
+    }
+//    $(element).find('td').each(cardTableHandleElementFunc);
+};
+
+function cadrListRefillingStart() {
+    var tb = $('#cardTable:eq(0) tbody');
+    var tableAmountRowsAll = tb.find("tr").length;
+    console.log("Number of rows : " + tableAmountRowsAll);
+    
+    cardTableCheckedRowsAmount = 0;
+    tb.find("tr").each(cardTableCountCheckedRowsFunc);                          //count number of checked rows
+    cardListCardNumberArray = new Array(cardTableCheckedRowsAmount);
+    cardListStatusArray = new Array(cardTableCheckedRowsAmount);
+    
+    console.log('Checked amount: ' + cardTableCheckedRowsAmount);
+    
+    cardListArrayPtr = 0;
+    tb.find("tr").each(cardTableHandleRowFunc);                                 //handle all rows
+    
+    cardListArrayHandlingPtr = 0;
+    cardRefillingProcessRun();
+}
+
+function cardRefillingProcessRun() {
+    if(cardListArrayHandlingPtr < cardTableCheckedRowsAmount) {
+        cardListStatusArray[cardListArrayHandlingPtr].html('Preparing for request');
+        cardNumberForRefill = cardListCardNumberArray[cardListArrayHandlingPtr];
+        cardRefillRequest();
+    }
+}
+
+// card refilling process ------------------------------------------------------
+function cardRefillRequest() {
+    messageType = MessageTypeEnum.REFILL_REQUEST;  
+    cardProcess();  
+}
+
+function sendCardRefillRequest(cardnumber) {
+    stompClient.send("/app/cardrefill", {}, JSON.stringify({
+                'packetType': 'CardRefillRequest',
+                'cardNumber': cardnumber, 
+                'sum': '10'}));
+}
+
+function cardRefillResponseHandle(cardRefillResponse) {
+    //if answer error {
+    //  state = StateEnum.ST_ERROR;
+    //} else {
+    state = StateEnum.ST_CARD_REFILLED;
+//    $("#cardInfoTextArea").empty();
+//    $("#cardInfoTextArea").append(JSON.parse(cardRefillResponse.body).cardInfoText);
+    cardDisconnect();
+    setConnectedStatus("Success");
+    cardListStatusArray[cardListArrayHandlingPtr].html('Card refilled');
+    //if success
+//    $( "#cardRefillButton" ).prop("disabled", false);
+        cardListArrayHandlingPtr++;
+        cardRefillingProcessRun();
+    //}
+    modifyElementsAccordingToState(state);    
+}
+
+// card list refilling process end ---------------------------------------------
+
 $(function () {
     $("form").on('submit', function (e) {
         e.preventDefault();
@@ -281,6 +401,6 @@ $(function () {
     
     $( "#cardListLoadFromDbButton" ).click(function() { cardListRequest(); });
     $( "#productionListLoadFromDbButton" ).click(function() { productionListRequest(); });
-
+    $( "#cardListRefillButton" ).click(function() { cadrListRefillingStart(); });
 });
 
