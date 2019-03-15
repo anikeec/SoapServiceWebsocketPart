@@ -1,5 +1,5 @@
 var stompClient = null;
-var socket = null;
+var sock = null;
 var MessageTypeEnum = {
                 "NONE":0, 
                 "CARD_INFO_REQUEST":1, 
@@ -17,13 +17,44 @@ var StateEnum = {
                 "ST_PRODUCTION_LIST_RECEIVED":5
             };
 var state = StateEnum.ST_INIT;
+var recInterval = null;
+
+// websocket handlers ----------------------------------------------------------
+var onMessage = function(e) {
+    console.log('socket message');
+};
+
+var onClose = function (e) {
+        setConnectedStatus("Disconnected");
+        recInterval = window.setInterval(function () {
+            openNewSocketConnection();
+        }, 2000);        
+    };
+var onOpen = function () {
+        clearInterval(recInterval);
+        setConnectedStatus("Connected");
+    };
+// websocket handlers end ------------------------------------------------------
+
+openNewSocketConnection = function() {  
+    sock = new SockJS('/gs-guide-websocket');    
+    setConnectedStatus("Try connect to server");    
+    sock.onopen = onOpen;    
+    sock.onmessage = onMessage;
+    sock.onclose = onClose;  
+};
 
 function cardProcess() {
-    socket = new SockJS('/gs-guide-websocket');
-    stompClient = Stomp.over(socket);
+    openNewSocketConnection(); 
+    
+    stompClient = Stomp.over(sock);
     stompClient.connect({}, function (frame) {
-        setConnectedStatus("Connected");
-        console.log('Connected: ' + frame);  
+//        sock.onopen = onOpen;    
+//        sock.onmessage = onMessage;
+//        sock.onclose = onClose;
+//        stompClient.heartbeat.outgoing = 100;
+//        setConnectedStatus("Connected");
+        console.log('StompClient: ' + frame);  
         stompClient.subscribe('/topic/greetings', function (response) {
             if(messageType === MessageTypeEnum.CARD_LIST_REQUEST) {
                 cardListResponseHandle(response);
@@ -39,22 +70,29 @@ function cardProcess() {
             state = StateEnum.ST_PRODUCTION_LIST_REQ_SENT;
         };
         modifyElementsAccordingToState(state);
+    }, function(error) {
+        console.log('StompClient: ' + error);
+        //I have to handle this message
     });
 }
 
 function cardDisconnect() {
     if (stompClient !== null) {
-        stompClient.disconnect();
+        stompClient.disconnect(function() {
+        console.log('StompClient: disconnected');
+        sock.close();
+    });
     }
-    if (socket !== null) {
-        socket.close();
-    }
-    setConnectedStatus("Disconnected");
-    console.log("Disconnected");
+//    if (sock !== null) {
+//        setConnectedStatus("Try disconnect");
+//        sock.close();
+//    }
+//    setConnectedStatus("Disconnected");
+    console.log("Server disconnected");
 }
 
 function setConnectedStatus(status) {
-    $("#operationResult").val(status);    
+    $("#connectionState").val(status);    
 }
 
 function resetButtonHandler() {
@@ -109,10 +147,35 @@ function modifyElementsAccordingToState(state) {
     }
 }
 
+
+//wait for response process ----------------------------------------------------
+const SERVER_QUERY_TIMEOUT = 2000;
+var sendInterval = null;
+
+function responseWaitingStart(waitTimeout) {
+    sendInterval = window.setInterval(function () {
+                                    responseWaitingTimeoutError();
+                                }, waitTimeout);
+}
+
+function responseWaitingTimeoutError() {        
+    if((sock.readyState === SockJS.CLOSED) || (sock.readyState === SockJS.CLOSING)) {
+        var mess = 'Server timeout error. Socket was closed.';
+        clearInterval(sendInterval);
+    } else {
+        var mess = 'Server timeout error.';
+    }
+    console.log(mess);
+    setConnectedStatus(mess);    
+}
+//wait for response process end ------------------------------------------------
+
+
 //card list query --------------------------------------------------------------
 function cardListRequest() {
     messageType = MessageTypeEnum.CARD_LIST_REQUEST;  
-    cardProcess();  
+    cardProcess();
+    responseWaitingStart(SERVER_QUERY_TIMEOUT);    
 }
 
 function sendCardListRequest() {
@@ -120,6 +183,7 @@ function sendCardListRequest() {
     stompClient.send("/app/cardlist", {}, JSON.stringify({
                 'packetType': 'CardRefillRequest',
                 'production': production}));//$("#cardNumberInput").val(), 
+    setConnectedStatus("CardListRequest sent");
 }
 
 function cardListResponseHandle(cardListResponse) {
@@ -128,13 +192,14 @@ function cardListResponseHandle(cardListResponse) {
     //} else {
     state = StateEnum.ST_CARD_LIST_RECEIVED;
     
+    clearInterval(sendInterval);
 //    $("#operationResultProduction").empty();
     $.each(JSON.parse(cardListResponse.body).cardList, function(i, item) {
         insertTableItem(i, item.cardNumber);
 //        $("#operationResultProduction").append(item.cardNumber);        
     });
     cardDisconnect();
-    setConnectedStatus("Success");
+    setConnectedStatus("CardListResponse received successfully");
     //if success
     //    $( "#cardRefillButton" ).prop("disabled", false);
     //}
@@ -159,15 +224,18 @@ function fillTableInit() {
     $('#cardTable tr').last().after(html);
 }
 
+
 //production list query --------------------------------------------------------
 function productionListRequest() {
     messageType = MessageTypeEnum.PRODUCTION_LIST_REQUEST;  
-    cardProcess();  
+    cardProcess();
+    responseWaitingStart(SERVER_QUERY_TIMEOUT);
 }
 
 function sendProductionListRequest() {
     stompClient.send("/app/productionlist", {}, JSON.stringify({
                 'packetType': 'ProductionListRequest'}));
+    setConnectedStatus("ProductionListRequest sent");
 }
 
 function productionListResponseHandle(productionListResponse) {
@@ -176,11 +244,12 @@ function productionListResponseHandle(productionListResponse) {
     //} else {
     state = StateEnum.ST_PRODUCTION_LIST_RECEIVED;
     
+    clearInterval(sendInterval);
     $.each(JSON.parse(productionListResponse.body).productionList, function(i, item) {
         insertProductionDropdownItem(i, item);        
     });
     cardDisconnect();
-    setConnectedStatus("Success");
+    setConnectedStatus("ProductionListResponse received successfully");
     //if success
     //    $( "#cardRefillButton" ).prop("disabled", false);
     //}
