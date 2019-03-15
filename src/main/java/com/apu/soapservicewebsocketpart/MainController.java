@@ -66,7 +66,11 @@ public class MainController {
         List<Card> fullCardList = new ArrayList<>();
         fullCardList.add(new Card("1111", "First production"));
         fullCardList.add(new Card("1212", "First production"));
+        fullCardList.add(new Card("1213", "First production"));
+        fullCardList.add(new Card("1214", "First production"));
         fullCardList.add(new Card("1313", "Second production"));
+        fullCardList.add(new Card("1314", "Second production"));
+        fullCardList.add(new Card("1315", "Second production"));
         
         String production = request.getProduction();
         List<Card> cardList = new ArrayList<>();
