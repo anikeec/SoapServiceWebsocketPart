@@ -81,9 +81,14 @@ function getDateTime() {
     var currentDate = new Date();
     var date = currentDate.getDate();
     var month = currentDate.getMonth(); 
-    var year = currentDate.getFullYear();
+    var year = '' + currentDate.getFullYear();
     var yyyymmdd = year + "." + pad(month + 1) + "." + pad(date);
-    return yyyymmdd;
+    var ddmmyyyy = pad(date) + "." + pad(month + 1) + "." + year.substring(2,4);
+    var hour = currentDate.getHours();
+    var minute = currentDate.getMinutes();
+    var second = currentDate.getSeconds();
+    var hhmmss = pad(hour) + ":" + pad(minute) + ":" + pad(second);
+    return ddmmyyyy + " " + hhmmss;
 }
 
 function setConnectedStatus(status) {
