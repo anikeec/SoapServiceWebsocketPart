@@ -19,34 +19,14 @@ var StateEnum = {
                 "ST_ERROR":7 
             };
 var state = StateEnum.ST_INIT;
-var recInterval = null;
 
-// websocket handlers ----------------------------------------------------------
-var onMessage = function(e) {
-    console.log('socket message');
-};
-
-var onClose = function (e) {
-        setConnectedStatus("Disconnected");
-        recInterval = window.setInterval(function () {
-            openNewSocketConnection();
-        }, 2000);        
-    };
-var onOpen = function () {
-        clearInterval(recInterval);
-        setConnectedStatus("Connected");
-    };
-// websocket handlers end ------------------------------------------------------
 
 openNewSocketConnection = function() {  
     sock = new SockJS('/gs-guide-websocket');    
     setConnectedStatus("Try connect to server");    
-    sock.onopen = onOpen;    
-    sock.onmessage = onMessage;
-    sock.onclose = onClose;  
 };
 
-function cardProcess() {
+function cardProcess(currentHandlingPtr) {
     openNewSocketConnection(); 
     
     stompClient = Stomp.over(sock);
@@ -63,7 +43,7 @@ function cardProcess() {
             } else if(messageType === MessageTypeEnum.PRODUCTION_LIST_REQUEST) {
                 productionListResponseHandle(response);
             } else if(messageType === MessageTypeEnum.REFILL_REQUEST) {
-                cardRefillResponseHandle(response);
+                cardRefillResponseHandle(response, currentHandlingPtr);
             };
         });
         if(messageType === MessageTypeEnum.CARD_LIST_REQUEST) {
@@ -85,6 +65,7 @@ function cardProcess() {
 
 function cardDisconnect() {
     if (stompClient !== null) {
+        if(stompClient)
         stompClient.disconnect(function() {
         console.log('StompClient: disconnected');
         sock.close();
@@ -165,8 +146,9 @@ function modifyElementsAccordingToState(state) {
     }
 }
 
-
-//wait for response process ----------------------------------------------------
+//------------------------------------------------------------------------------
+//wait for response process 
+//------------------------------------------------------------------------------
 const SERVER_QUERY_TIMEOUT = 2000;
 var sendInterval = null;
 
@@ -178,18 +160,27 @@ function responseWaitingStart(waitTimeout) {
 
 function responseWaitingTimeoutError() {        
     if((sock.readyState === SockJS.CLOSED) || (sock.readyState === SockJS.CLOSING)) {
-        var mess = 'Server timeout error. Socket was closed.';
+        var mess = 'Server timeout error. Socket was closed.';        
         clearInterval(sendInterval);
     } else {
         var mess = 'Server timeout error.';
+    }
+    if(state === StateEnum.ST_CARD_REFILL_REQ_SENT) {
+        state = StateEnum.ST_CARD_REFILLED;                                     //or error
+        mess += '\nRefilling card #' + cardNumberForRefill + ' error.';
+        cardListChecked.statusArray[cardListChecked.handlingPtr].html('Error');
+        cardRefillNextCard();            
+    } else {
+
     }
     console.log(mess);
     setConnectedStatus(mess);    
 }
 //wait for response process end ------------------------------------------------
 
-
-//card list query --------------------------------------------------------------
+//------------------------------------------------------------------------------
+//card list query
+//------------------------------------------------------------------------------
 function cardListRequest() {
     messageType = MessageTypeEnum.CARD_LIST_REQUEST;  
     cardProcess();
@@ -244,8 +235,9 @@ function fillTableInit() {
     $('#cardTable tr').last().after(html);
 }
 
-
-//production list query --------------------------------------------------------
+//------------------------------------------------------------------------------
+//production list query
+//------------------------------------------------------------------------------
 function productionListRequest() {
     messageType = MessageTypeEnum.PRODUCTION_LIST_REQUEST;  
     cardProcess();
@@ -284,22 +276,15 @@ function insertProductionDropdownItem(id, production) {
 
 //production list query end ----------------------------------------------------
 
-
-// card list refilling process -------------------------------------------------
-/*
- * I have to refill all selected elements from table
- * at-first I have to parse table and convert it to card array
- * for each element:
- *  I have to create refilling query and setTimeout
- *  when timeout has finished I have marked card with error status
- *  if answer received, I marked card with success status and go forward to other cards
- * until last element (count table size???)
-*/
-var cardListChecked = new Object();
-cardListChecked.ptr = 0;
-cardListChecked.handlingPtr = 0;
-cardListChecked.cardNumberArray = new Array();
-cardListChecked.statusArray = new Array();
+//------------------------------------------------------------------------------
+// card list refilling process 
+//------------------------------------------------------------------------------
+var cardListChecked = {
+    ptr: 0,
+    handlingPtr: 0,
+    cardNumberArray: new Array(),
+    statusArray: new Array()
+};
 
 var cardNumberForRefill = null;
 
@@ -324,21 +309,23 @@ function cadrListRefillingStart() {
     tb.find("tr").each(cardTableHandleRowFunc);                                 //handle all rows
     
     cardListChecked.handlingPtr = 0;
-    cardRefillingProcessRun();
+    cardRefillingProcessRun(cardListChecked.handlingPtr);
 }
 
-function cardRefillingProcessRun() {
-    if(cardListChecked.handlingPtr < cardListChecked.statusArray.length) {
-        cardListChecked.statusArray[cardListChecked.handlingPtr].html('Preparing for request');
-        cardNumberForRefill = cardListChecked.cardNumberArray[cardListChecked.handlingPtr];
-        cardRefillRequest();
+function cardRefillingProcessRun(currentHandlingPtr) {
+    if(currentHandlingPtr < cardListChecked.statusArray.length) {
+        cardListChecked.statusArray[currentHandlingPtr].html('Preparing for request');
+        cardNumberForRefill = cardListChecked.cardNumberArray[currentHandlingPtr];
+        cardRefillRequest(currentHandlingPtr);
     }
 }
 
-// card refilling process ------------------------------------------------------
-function cardRefillRequest() {
+//------------------------------------------------------------------------------
+// card refilling process 
+//------------------------------------------------------------------------------
+function cardRefillRequest(currentHandlingPtr) {
     messageType = MessageTypeEnum.REFILL_REQUEST;  
-    cardProcess();  
+    cardProcess(currentHandlingPtr);  
 }
 
 function sendCardRefillRequest(cardnumber) {
@@ -346,24 +333,30 @@ function sendCardRefillRequest(cardnumber) {
                 'packetType': 'CardRefillRequest',
                 'cardNumber': cardnumber, 
                 'sum': '10'}));
+    responseWaitingStart(SERVER_QUERY_TIMEOUT);
 }
 
-function cardRefillResponseHandle(cardRefillResponse) {
+function cardRefillResponseHandle(cardRefillResponse, currentHandlingPtr) {
     //if answer error {
     //  state = StateEnum.ST_ERROR;
     //} else {
     state = StateEnum.ST_CARD_REFILLED;
+    clearInterval(sendInterval);
 //    $("#cardInfoTextArea").empty();
 //    $("#cardInfoTextArea").append(JSON.parse(cardRefillResponse.body).cardInfoText);
-    cardDisconnect();
     setConnectedStatus("Success");
-    cardListChecked.statusArray[cardListChecked.handlingPtr].html('Card refilled');
+    cardListChecked.statusArray[currentHandlingPtr].html('Card refilled');
+    cardDisconnect();    
     //if success
 //    $( "#cardRefillButton" ).prop("disabled", false);
-        cardListChecked.handlingPtr++;
-        cardRefillingProcessRun();
+        cardRefillNextCard(currentHandlingPtr);
     //}
     modifyElementsAccordingToState(state);    
+}
+
+function cardRefillNextCard(currentHandlingPtr) {
+    cardListChecked.handlingPtr = currentHandlingPtr + 1;
+    cardRefillingProcessRun(cardListChecked.handlingPtr);
 }
 
 // card list refilling process end ---------------------------------------------
