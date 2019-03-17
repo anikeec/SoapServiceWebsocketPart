@@ -309,6 +309,10 @@ function cadrListRefillingStart() {
     var tb = $('#cardTable:eq(0) tbody');
     
     cardListChecked.ptr = 0;
+    cardListChecked.handlingPtr = 0;
+    cardListChecked.cardNumberArray = new Array();
+    cardListChecked.statusArray = new Array();
+
     tb.find("tr").each(cardTableHandleRowFunc);                                 //handle all rows
     
     cardListChecked.handlingPtr = 0;
