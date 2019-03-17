@@ -31,11 +31,6 @@ function cardProcess(messageType, currentHandlingPtr) {
     
     stompClient = Stomp.over(sock);
     stompClient.connect({}, function (frame) {
-//        sock.onopen = onOpen;    
-//        sock.onmessage = onMessage;
-//        sock.onclose = onClose;
-//        stompClient.heartbeat.outgoing = 100;
-//        setConnectedStatus("Connected");
         console.log('StompClient: ' + frame);  
         stompClient.subscribe('/topic/greetings', function (response) {
             if(messageType === MessageTypeEnum.CARD_LIST_REQUEST) {
@@ -67,15 +62,10 @@ function cardDisconnect() {
     if (stompClient !== null) {
         if(stompClient)
         stompClient.disconnect(function() {
-        console.log('StompClient: disconnected');
-        sock.close();
-    });
+            console.log('StompClient: disconnected');
+            sock.close();
+        });
     }
-//    if (sock !== null) {
-//        setConnectedStatus("Try disconnect");
-//        sock.close();
-//    }
-//    setConnectedStatus("Disconnected");
     console.log("Server disconnected");
 }
 
@@ -103,7 +93,6 @@ function modifyElementsAccordingToState(state) {
                                 $('#cardTable tbody').empty();
                                 $("#operationResultProduction").empty();
                                 $("#productionListSelector").empty();
-//                                $("#operationResult").val(""); 
                                 break;
         case StateEnum.ST_CARD_LIST_REQ_SENT:
                                 $("#cardListLoadFromFileButton").prop("disabled", true);
@@ -162,10 +151,14 @@ function responseWaitingStart(waitTimeout) {
                                 }, waitTimeout);
 }
 
+function responseWaitingStop() {
+    clearInterval(sendInterval);
+}
+
 function responseWaitingTimeoutError() {        
     if((sock.readyState === SockJS.CLOSED) || (sock.readyState === SockJS.CLOSING)) {
         var mess = 'Server timeout error. Socket was closed.';        
-        clearInterval(sendInterval);
+        responseWaitingStart();
     } else {
         var mess = 'Server timeout error.';
     }
@@ -206,7 +199,7 @@ function cardListResponseHandle(cardListResponse) {
     //} else {
     state = StateEnum.ST_CARD_LIST_RECEIVED;
     
-    clearInterval(sendInterval);
+    responseWaitingStart();
 //    $("#operationResultProduction").empty();
     $.each(JSON.parse(cardListResponse.body).cardList, function(i, item) {
         insertTableItem(i, item.cardNumber);
@@ -260,7 +253,7 @@ function productionListResponseHandle(productionListResponse) {
     //} else {
     state = StateEnum.ST_PRODUCTION_LIST_RECEIVED;
     
-    clearInterval(sendInterval);
+    responseWaitingStart();
     $.each(JSON.parse(productionListResponse.body).productionList, function(i, item) {
         insertProductionDropdownItem(i, item);        
     });
@@ -357,7 +350,7 @@ function cardRefillResponseHandle(cardRefillResponse, currentHandlingPtr) {
         cardListChecked.statusArray[currentHandlingPtr].html('Error');
     }
     state = StateEnum.ST_CARD_REFILLED;
-    clearInterval(sendInterval);    
+    responseWaitingStart();    
     cardDisconnect(); 
     if(cardRefillNextCard(currentHandlingPtr) === false) {
         state = StateEnum.ST_CARD_LIST_REFILLED;        
