@@ -295,61 +295,42 @@ function insertProductionDropdownItem(id, production) {
  *  if answer received, I marked card with success status and go forward to other cards
  * until last element (count table size???)
 */
-var tableAmountRowsAll = null;
-var cardListCardNumberArray = null;
-var cardListStatusArray = null;
-var cardListArrayPtr = 0;
-var cardListArrayHandlingPtr = 0;
+var cardListChecked = new Object();
+cardListChecked.ptr = 0;
+cardListChecked.handlingPtr = 0;
+cardListChecked.cardNumberArray = new Array();
+cardListChecked.statusArray = new Array();
+
 var cardNumberForRefill = null;
 
 function cardTableHandleCheckedRow(row) {
-//    console.log('Element checked');
-    cardListCardNumberArray[cardListArrayPtr] = row.find('td[name="tdCardNumber"]').text();
-    cardListStatusArray[cardListArrayPtr] = row.find('td[name="tdCardStatus"]');
-//    cardListStatusArray[cardListArrayPtr].html('Send request');
-//    console.log(cardListCardNumberArray[elementArrayPtr]);
-    cardListArrayPtr++;
+    cardListChecked.cardNumberArray[cardListChecked.ptr] = row.find('td[name="tdCardNumber"]').text();
+    cardListChecked.statusArray[cardListChecked.ptr] = row.find('td[name="tdCardStatus"]');
+    cardListChecked.ptr++;
 }
 
-var cardTableCheckedRowsAmount = 0;
-var cardTableCountCheckedRowsFunc = function cardTableCountCheckedRows(index, element) {
-    if($(element).find('input[type="checkbox"]').is(':checked')) {        
-        cardTableCheckedRowsAmount++;
-    }
-};
-
-var cardTableHandleRowFunc = function cardTableHandleRow(index, element) {
+var cardTableHandleRowFunc = function (index, element) {
     var colSize = $(element).find('td').length;
     console.log("  Number of cols in row " + (index + 1) + " : " + colSize);
     if($(element).find('input[type="checkbox"]').is(':checked')) {        
         cardTableHandleCheckedRow($(element));
     }
-//    $(element).find('td').each(cardTableHandleElementFunc);
 };
 
 function cadrListRefillingStart() {
     var tb = $('#cardTable:eq(0) tbody');
-    var tableAmountRowsAll = tb.find("tr").length;
-    console.log("Number of rows : " + tableAmountRowsAll);
     
-    cardTableCheckedRowsAmount = 0;
-    tb.find("tr").each(cardTableCountCheckedRowsFunc);                          //count number of checked rows
-    cardListCardNumberArray = new Array(cardTableCheckedRowsAmount);
-    cardListStatusArray = new Array(cardTableCheckedRowsAmount);
-    
-    console.log('Checked amount: ' + cardTableCheckedRowsAmount);
-    
-    cardListArrayPtr = 0;
+    cardListChecked.ptr = 0;
     tb.find("tr").each(cardTableHandleRowFunc);                                 //handle all rows
     
-    cardListArrayHandlingPtr = 0;
+    cardListChecked.handlingPtr = 0;
     cardRefillingProcessRun();
 }
 
 function cardRefillingProcessRun() {
-    if(cardListArrayHandlingPtr < cardTableCheckedRowsAmount) {
-        cardListStatusArray[cardListArrayHandlingPtr].html('Preparing for request');
-        cardNumberForRefill = cardListCardNumberArray[cardListArrayHandlingPtr];
+    if(cardListChecked.handlingPtr < cardListChecked.statusArray.length) {
+        cardListChecked.statusArray[cardListChecked.handlingPtr].html('Preparing for request');
+        cardNumberForRefill = cardListChecked.cardNumberArray[cardListChecked.handlingPtr];
         cardRefillRequest();
     }
 }
@@ -376,10 +357,10 @@ function cardRefillResponseHandle(cardRefillResponse) {
 //    $("#cardInfoTextArea").append(JSON.parse(cardRefillResponse.body).cardInfoText);
     cardDisconnect();
     setConnectedStatus("Success");
-    cardListStatusArray[cardListArrayHandlingPtr].html('Card refilled');
+    cardListChecked.statusArray[cardListChecked.handlingPtr].html('Card refilled');
     //if success
 //    $( "#cardRefillButton" ).prop("disabled", false);
-        cardListArrayHandlingPtr++;
+        cardListChecked.handlingPtr++;
         cardRefillingProcessRun();
     //}
     modifyElementsAccordingToState(state);    
