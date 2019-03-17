@@ -294,16 +294,12 @@ var cardListChecked = {
 var cardNumberForRefill = null;
 
 function cardTableHandleCheckedRow(row) {
-    cardListChecked.cardNumberArray[cardListChecked.ptr] = row.find('td[name="tdCardNumber"]').text();
-    cardListChecked.statusArray[cardListChecked.ptr] = row.find('td[name="tdCardStatus"]');
+    cardListChecked.cardNumberArray[cardListChecked.ptr] = 
+                                row.find('td[name="tdCardNumber"]').text();
+    cardListChecked.statusArray[cardListChecked.ptr] = 
+                                row.find('td[name="tdCardStatus"]');
     cardListChecked.ptr++;
 }
-
-var cardTableHandleRowFunc = function (index, element) {
-    if($(element).find('input[type="checkbox"]').is(':checked')) {        
-        cardTableHandleCheckedRow($(element));
-    }
-};
 
 function cadrListRefillingStart() {    
     var tb = $('#cardTable:eq(0) tbody');
@@ -313,9 +309,12 @@ function cadrListRefillingStart() {
     cardListChecked.cardNumberArray = new Array();
     cardListChecked.statusArray = new Array();
 
-    tb.find("tr").each(cardTableHandleRowFunc);                                 //handle all rows
-    
-    cardListChecked.handlingPtr = 0;
+    tb.find("tr").each( function (index, element) {
+        if($(element).find('input[type="checkbox"]').is(':checked')) {        
+            cardTableHandleCheckedRow($(element));
+        }
+    });                                 
+
     if(cardRefillingProcessRun(cardListChecked.handlingPtr) === false) {
         state = StateEnum.ST_CARD_LIST_REFILLED;
     }
