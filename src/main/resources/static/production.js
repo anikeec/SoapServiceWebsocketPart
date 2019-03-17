@@ -10,18 +10,19 @@ var MessageTypeEnum = {
 var StateEnum = {
                 "ST_INIT":0,                
                 "ST_CARD_LIST_REQ_SENT":1, 
-                "ST_CARD_LIST_RECEIVED":2,
-                "ST_CARD_REFILL_REQ_SENT":3, 
-                "ST_CARD_REFILLED":4,
-                "ST_PRODUCTION_LIST_REQ_SENT":5, 
-                "ST_PRODUCTION_LIST_RECEIVED":6,
-                "ST_CARD_LIST_REFILLED":7,
-                "ST_CARD_LIST_RECEIVED_ERROR":8,
-                "ST_PRODUCTION_LIST_RECEIVED_ERROR":9,
-                "ST_CARD_REFILLED_ERROR":10,
+                "ST_CARD_LIST_RECEIVED":2,                
+                "ST_CARD_LIST_RECEIVED_ERROR":3,
+                "ST_CARD_LIST_REFILLED":4,
+                "ST_CARD_REFILL_REQ_SENT":5, 
+                "ST_CARD_REFILLED":6,
+                "ST_CARD_REFILLED_ERROR":7,
+                "ST_PRODUCTION_LIST_REQ_SENT":8, 
+                "ST_PRODUCTION_LIST_RECEIVED":9,
+                "ST_PRODUCTION_LIST_RECEIVED_ERROR":10,              
                 "ST_ERROR":11 
             };
 var state = StateEnum.ST_INIT;
+var mustStopFlag = false;
 
 
 openNewSocketConnection = function() {  
@@ -96,53 +97,80 @@ function setConnectedStatus(status) {
 }
 
 function resetButtonHandler() {
-    state = StateEnum.ST_INIT;
+    if((state === StateEnum.ST_CARD_REFILL_REQ_SENT) 
+        || (state === StateEnum.ST_CARD_REFILLED)
+        || (state === StateEnum.ST_CARD_REFILLED_ERROR)){
+        mustStopFlag = true;
+        var mess = "Request to stop process. Reset button was pressed.";
+        console.log(mess);
+        setConnectedStatus(mess);
+    } else {
+        state = StateEnum.ST_INIT;
+    }
     modifyElementsAccordingToState(state);
 }
 
 function modifyElementsAccordingToState(state) {
     switch(state) {
-        case StateEnum.ST_INIT:
+        case StateEnum.ST_INIT:                                
+                                $("#productionListLoadFromDbButton").prop("disabled", false);
+                                $("#cardListLoadFromFileButton").prop("disabled", true);
+                                $("#cardListLoadFromDbButton").prop("disabled", true);
                                 $("#cardListResetButton").prop("disabled", true);
-                                $("#cardListLoadFromFileButton").prop("disabled", false);
-                                $("#cardListLoadFromDbButton").prop("disabled", false);
                                 $("#cardListRefillButton").prop("disabled", true);
                                 $('#cardTable tbody').empty();
-                                $("#operationResultProduction").empty();
+                                $("#operationResultProduction").empty();                                
                                 $("#productionListSelector").empty();
                                 break;
         case StateEnum.ST_CARD_LIST_REQ_SENT:
+                                $("#productionListLoadFromDbButton").prop("disabled", true);
                                 $("#cardListLoadFromFileButton").prop("disabled", true);
                                 $("#cardListLoadFromDbButton").prop("disabled", true);
+                                $("#cardListResetButton").prop("disabled", false);
+                                $("#cardListRefillButton").prop("disabled", true);
                                 $('#cardTable tbody').empty();
                                 break;
         case StateEnum.ST_CARD_LIST_RECEIVED:
-                                $("#cardListResetButton").prop("disabled", false);
+                                $("#productionListLoadFromDbButton").prop("disabled", false);                                
                                 $("#cardListLoadFromFileButton").prop("disabled", true);
                                 $("#cardListLoadFromDbButton").prop("disabled", true);
+                                $("#cardListResetButton").prop("disabled", false);
                                 $("#cardListRefillButton").prop("disabled", false);
                                 break;
         case StateEnum.ST_PRODUCTION_LIST_REQ_SENT:
+                                $("#productionListLoadFromDbButton").prop("disabled", true);                                
                                 $("#cardListLoadFromFileButton").prop("disabled", true);
                                 $("#cardListLoadFromDbButton").prop("disabled", true);
+                                $("#cardListResetButton").prop("disabled", false);
                                 $("#cardListRefillButton").prop("disabled", true);
-                                $("#productionListLoadFromDbButton").prop("disabled", true);
                                 $("#productionListSelector").empty();
                                 break;
         case StateEnum.ST_PRODUCTION_LIST_RECEIVED:
-                                $("#cardListResetButton").prop("disabled", false);
+                                $("#productionListLoadFromDbButton").prop("disabled", false);                                
                                 $("#cardListLoadFromFileButton").prop("disabled", true);
                                 $("#cardListLoadFromDbButton").prop("disabled", false);
+                                $("#cardListResetButton").prop("disabled", false);
                                 $("#cardListRefillButton").prop("disabled", true);
-                                $("#productionListLoadFromDbButton").prop("disabled", false);
                                 break;
         case StateEnum.ST_CARD_REFILL_REQ_SENT:
-                                
+                                $("#productionListLoadFromDbButton").prop("disabled", true);                                
+                                $("#cardListLoadFromFileButton").prop("disabled", true);
+                                $("#cardListLoadFromDbButton").prop("disabled", true);
+                                $("#cardListResetButton").prop("disabled", false);
+                                $("#cardListRefillButton").prop("disabled", true);
                                 break;
         case StateEnum.ST_CARD_REFILLED:
-                                
+                                $("#productionListLoadFromDbButton").prop("disabled", true);                                
+                                $("#cardListLoadFromFileButton").prop("disabled", true);
+                                $("#cardListLoadFromDbButton").prop("disabled", true);
+                                $("#cardListResetButton").prop("disabled", false);
+                                $("#cardListRefillButton").prop("disabled", true);
                                 break;
         case StateEnum.ST_CARD_LIST_REFILLED:
+                                $("#productionListLoadFromDbButton").prop("disabled", false);                                
+                                $("#cardListLoadFromFileButton").prop("disabled", true);
+                                $("#cardListLoadFromDbButton").prop("disabled", false);
+                                $("#cardListResetButton").prop("disabled", false);
                                 $("#cardListRefillButton").prop("disabled", false);
                                 break;
         case StateEnum.ST_CARD_LIST_RECEIVED_ERROR:
@@ -155,7 +183,7 @@ function modifyElementsAccordingToState(state) {
                                 break;
         case StateEnum.ST_PRODUCTION_LIST_RECEIVED_ERROR:
                                 $('#cardTable tbody').empty();
-                                $("#productionListLoadFromDbButton").prop("disabled", false);
+                                $("#productionListLoadFromDbButton").prop("disabled", false);                                
                                 $("#cardListLoadFromFileButton").prop("disabled", true);
                                 $("#cardListLoadFromDbButton").prop("disabled", true);
                                 $("#cardListResetButton").prop("disabled", false);
@@ -166,9 +194,11 @@ function modifyElementsAccordingToState(state) {
                                 break;
         case StateEnum.ST_ERROR:
         default:
-                                $("#cardListResetButton").prop("disabled", true);
+                                $("#productionListLoadFromDbButton").prop("disabled", false);                                
                                 $("#cardListLoadFromFileButton").prop("disabled", true);
                                 $("#cardListLoadFromDbButton").prop("disabled", true);
+                                $("#cardListResetButton").prop("disabled", false);
+                                $("#cardListRefillButton").prop("disabled", true);
 //                                $('#cardTable tbody').empty();
 //                                $("#operationResultProduction").empty(); 
                                 break;                    
@@ -336,6 +366,11 @@ function cadrListRefillingStart() {
 }
 
 function cardRefillingProcessRun(currentHandlingPtr) {
+    if(mustStopFlag === true) {
+        mustStopFlag = false;
+        state = StateEnum.ST_CARD_LIST_REFILLED;        
+        return false;
+    }
     if(currentHandlingPtr < cardListChecked.statusArray.length) {
         cardListChecked.statusArray[currentHandlingPtr].html('Preparing for request...'); 
         cardProcess(MessageTypeEnum.REFILL_REQUEST, currentHandlingPtr);
