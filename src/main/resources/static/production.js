@@ -379,7 +379,8 @@ function cardRefillingProcessRun(currentHandlingPtr) {
         return false;
     }
     if(currentHandlingPtr < cardListChecked.statusArray.length) {
-        cardListChecked.statusArray[currentHandlingPtr].html('Preparing for request...'); 
+        cardListChecked.statusArray[currentHandlingPtr]
+                            .html('Preparing for request...'); 
         cardProcess(MessageTypeEnum.REFILL_REQUEST, currentHandlingPtr);
         responseWaitingStart(SERVER_QUERY_TIMEOUT);
         return true;
@@ -396,6 +397,8 @@ function sendCardRefillRequest(currentHandlingPtr) {
                 'packetType': 'CardRefillRequest',
                 'cardNumber': cardListChecked.cardNumberArray[currentHandlingPtr], 
                 'sum': cardListChecked.sumArray[currentHandlingPtr]}));
+    cardListChecked.statusArray[currentHandlingPtr]
+                            .html('Request sent. Waiting for response...');
     setConnectedStatus("CardRefillRequest sent");
 }
 
