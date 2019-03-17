@@ -338,20 +338,26 @@ function sendCardRefillRequest(cardnumber) {
                 'packetType': 'CardRefillRequest',
                 'cardNumber': cardnumber, 
                 'sum': '10'}));
+    setConnectedStatus("CardRefillRequest sent");
 }
 
 function cardRefillResponseHandle(cardRefillResponse, currentHandlingPtr) {
     var errors = JSON.parse(cardRefillResponse.body).errors;
+    setConnectedStatus("CardRefillResponse received");
     if(errors === 'none') {
-        setConnectedStatus("Success");
+        setConnectedStatus('Card #' 
+                + cardListChecked.cardNumberArray[currentHandlingPtr]
+                + ' refilled succesfully');
         cardListChecked.statusArray[currentHandlingPtr].html('Card refilled');
     } else {
-        setConnectedStatus("Error: " + errors);
+        setConnectedStatus('Card #' 
+                + cardListChecked.cardNumberArray[currentHandlingPtr]
+                + ' refilling has errors: ' + errors);
         cardListChecked.statusArray[currentHandlingPtr].html('Error');
     }
     state = StateEnum.ST_CARD_REFILLED;
     clearInterval(sendInterval);    
-    cardDisconnect();    
+    cardDisconnect(); 
     if(cardRefillNextCard(currentHandlingPtr) === false) {
         state = StateEnum.ST_CARD_LIST_REFILLED;        
     }
