@@ -16,14 +16,16 @@ public class ProductionListResponse {
     
     private final String packetType;
     private List<String> productionList = new ArrayList<>();
+    private String errors;
 
     public ProductionListResponse() {
         this.packetType = PacketType.PRODUCTION_LIST_RESPONSE;
     }
 
-    public ProductionListResponse(List<String> productionList) {
+    public ProductionListResponse(List<String> productionList, String errors) {
         this();
         this.productionList = productionList;
+        this.errors = errors;
     }
 
     public List<String> getProductionList() {
@@ -32,6 +34,10 @@ public class ProductionListResponse {
 
     public String getPacketType() {
         return packetType;
+    }
+
+    public String getErrors() {
+        return errors;
     }
     
 }

@@ -16,7 +16,10 @@ var StateEnum = {
                 "ST_PRODUCTION_LIST_REQ_SENT":5, 
                 "ST_PRODUCTION_LIST_RECEIVED":6,
                 "ST_CARD_LIST_REFILLED":7,
-                "ST_ERROR":8 
+                "ST_CARD_LIST_RECEIVED_ERROR":8,
+                "ST_PRODUCTION_LIST_RECEIVED_ERROR":9,
+                "ST_CARD_REFILLED_ERROR":10,
+                "ST_ERROR":11 
             };
 var state = StateEnum.ST_INIT;
 
@@ -128,13 +131,32 @@ function modifyElementsAccordingToState(state) {
         case StateEnum.ST_CARD_LIST_REFILLED:
                                 $("#cardListRefillButton").prop("disabled", false);
                                 break;
+        case StateEnum.ST_CARD_LIST_RECEIVED_ERROR:
+                                $('#cardTable tbody').empty();
+                                $("#productionListLoadFromDbButton").prop("disabled", false);
+                                $("#cardListLoadFromFileButton").prop("disabled", true);
+                                $("#cardListLoadFromDbButton").prop("disabled", false);
+                                $("#cardListResetButton").prop("disabled", false);
+                                $("#cardListRefillButton").prop("disabled", true);
+                                break;
+        case StateEnum.ST_PRODUCTION_LIST_RECEIVED_ERROR:
+                                $('#cardTable tbody').empty();
+                                $("#productionListLoadFromDbButton").prop("disabled", false);
+                                $("#cardListLoadFromFileButton").prop("disabled", true);
+                                $("#cardListLoadFromDbButton").prop("disabled", true);
+                                $("#cardListResetButton").prop("disabled", false);
+                                $("#cardListRefillButton").prop("disabled", true);
+                                break;
+        case StateEnum.ST_CARD_REFILLED_ERROR:
+                                
+                                break;
         case StateEnum.ST_ERROR:
         default:
                                 $("#cardListResetButton").prop("disabled", true);
                                 $("#cardListLoadFromFileButton").prop("disabled", true);
                                 $("#cardListLoadFromDbButton").prop("disabled", true);
-                                $('#cardTable tbody').empty();
-                                $("#operationResultProduction").empty(); 
+//                                $('#cardTable tbody').empty();
+//                                $("#operationResultProduction").empty(); 
                                 break;                    
     }
 }
@@ -158,7 +180,7 @@ function responseWaitingStop() {
 function responseWaitingTimeoutError() {        
     if((sock.readyState === SockJS.CLOSED) || (sock.readyState === SockJS.CLOSING)) {
         var mess = 'Server timeout error. Socket was closed.';        
-        responseWaitingStart();
+        responseWaitingStop();
     } else {
         var mess = 'Server timeout error.';
     }
@@ -189,29 +211,25 @@ function sendCardListRequest() {
     var production = $("#productionListSelector").val();
     stompClient.send("/app/cardlist", {}, JSON.stringify({
                 'packetType': 'CardRefillRequest',
-                'production': production}));//$("#cardNumberInput").val(), 
+                'production': production})); 
     setConnectedStatus("CardListRequest sent");
 }
 
 function cardListResponseHandle(cardListResponse) {
-    //if answer error {
-    //  state = StateEnum.ST_ERROR;
-    //} else {
-    state = StateEnum.ST_CARD_LIST_RECEIVED;
-    
-    responseWaitingStart();
-//    $("#operationResultProduction").empty();
-    $.each(JSON.parse(cardListResponse.body).cardList, function(i, item) {
-        insertTableItem(i, item.cardNumber);
-//        $("#operationResultProduction").append(item.cardNumber);        
-    });
+    var errors = JSON.parse(cardListResponse.body).errors;    
+    if(errors === 'none') {
+        setConnectedStatus('CardListResponse received successfully.');
+        state = StateEnum.ST_CARD_LIST_RECEIVED;  
+        $.each(JSON.parse(cardListResponse.body).cardList, function(i, item) {
+            insertTableItem(i, item.cardNumber);        
+        });
+    } else {
+        setConnectedStatus('CardListResponse has errors: ' + errors);
+        state = StateEnum.ST_CARD_LIST_RECEIVED_ERROR;
+    }  
+    responseWaitingStop();    
     cardDisconnect();
-    setConnectedStatus("CardListResponse received successfully");
-    //if success
-    //    $( "#cardRefillButton" ).prop("disabled", false);
-    //}
     modifyElementsAccordingToState(state);
-    //}
 }
 
 function insertTableItem(id, cardnumber) {
@@ -223,15 +241,7 @@ function insertTableItem(id, cardnumber) {
             + '</tr>';
     $('#cardTable > tbody:last-child').append(html);
 }
-
-function fillTableInit() {
-    var html = '';
-    for(var i = 0; i < 100; i++)
-            html += '<tr><td><input type="checkbox" class="cardCheckbox"></td>'
-                + '<td>' + ''  
-                + '</td><td>' + '' + '</td></tr>';
-    $('#cardTable tr').last().after(html);
-}
+//card list query end ----------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //production list query
@@ -248,22 +258,20 @@ function sendProductionListRequest() {
 }
 
 function productionListResponseHandle(productionListResponse) {
-    //if answer error {
-    //  state = StateEnum.ST_ERROR;
-    //} else {
-    state = StateEnum.ST_PRODUCTION_LIST_RECEIVED;
-    
-    responseWaitingStart();
-    $.each(JSON.parse(productionListResponse.body).productionList, function(i, item) {
-        insertProductionDropdownItem(i, item);        
-    });
+    var errors = JSON.parse(productionListResponse.body).errors;
+    if(errors === 'none') {
+        setConnectedStatus('ProductionListResponse received successfully.');
+        state = StateEnum.ST_PRODUCTION_LIST_RECEIVED;   
+        $.each(JSON.parse(productionListResponse.body).productionList, function(i, item) {
+            insertProductionDropdownItem(i, item);        
+        });
+    } else {
+        setConnectedStatus('ProductionListResponse has errors: ' + errors);
+        state = StateEnum.ST_PRODUCTION_LIST_RECEIVED_ERROR;
+    } 
+    responseWaitingStop();
     cardDisconnect();
-    setConnectedStatus("ProductionListResponse received successfully");
-    //if success
-    //    $( "#cardRefillButton" ).prop("disabled", false);
-    //}
     modifyElementsAccordingToState(state);
-    //}
 }
 
 function insertProductionDropdownItem(id, production) {
@@ -350,7 +358,7 @@ function cardRefillResponseHandle(cardRefillResponse, currentHandlingPtr) {
         cardListChecked.statusArray[currentHandlingPtr].html('Error');
     }
     state = StateEnum.ST_CARD_REFILLED;
-    responseWaitingStart();    
+    responseWaitingStop();    
     cardDisconnect(); 
     if(cardRefillNextCard(currentHandlingPtr) === false) {
         state = StateEnum.ST_CARD_LIST_REFILLED;        

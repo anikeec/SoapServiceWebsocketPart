@@ -28,7 +28,7 @@ public class MainController {
             //error
         }
         Thread.sleep(1000); // simulated delay
-        return new CardInfoResponse("Card number is " + HtmlUtils.htmlEscape(request.getCardNumber()) + "!");
+        return new CardInfoResponse("Card number is " + HtmlUtils.htmlEscape(request.getCardNumber()) + "!", ERRORS_NONE);
     }
     
     @MessageMapping("/cardrefill")
@@ -62,7 +62,7 @@ public class MainController {
         List<String> productionList = new ArrayList<>();
         productionList.add("First production");
         productionList.add("Second production");
-        return new ProductionListResponse(productionList);
+        return new ProductionListResponse(productionList, ERRORS_NONE);
     }
     
     @MessageMapping("/cardlist")
@@ -89,7 +89,7 @@ public class MainController {
             }
         }
         
-        return new CardListResponse(cardList);
+        return new CardListResponse(cardList, ERRORS_NONE);
     }
     
 }

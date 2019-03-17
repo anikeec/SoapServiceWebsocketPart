@@ -13,14 +13,16 @@ public class CardInfoResponse {
     
     private final String packetType;
     private String cardInfoText;
+    private String errors;
 
     public CardInfoResponse() {
         this.packetType = PacketType.CARD_INFO_RESPONSE;
     }
 
-    public CardInfoResponse(String cardInfoText) {
+    public CardInfoResponse(String cardInfoText, String errors) {
         this();
         this.cardInfoText = cardInfoText;
+        this.errors = errors;
     }
 
     public String getCardInfoText() {
@@ -29,6 +31,10 @@ public class CardInfoResponse {
 
     public String getPacketType() {
         return packetType;
+    }
+
+    public String getErrors() {
+        return errors;
     }
     
 }
