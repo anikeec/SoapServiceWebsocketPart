@@ -387,7 +387,7 @@ function cardRefillNextCard(currentHandlingPtr) {
 
 // card list refilling process end ---------------------------------------------
 
-$(function () {
+$(document).ready(function () {
     $("form").on('submit', function (e) {
         e.preventDefault();
     });
