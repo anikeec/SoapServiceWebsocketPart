@@ -72,8 +72,22 @@ function cardDisconnect() {
     console.log("Server disconnected");
 }
 
+function pad(n) {
+    return n<10 ? '0'+n : n;
+}
+
+function getDateTime() {
+    var currentDate = new Date();
+    var date = currentDate.getDate();
+    var month = currentDate.getMonth(); 
+    var year = currentDate.getFullYear();
+    var yyyymmdd = year + "." + pad(month + 1) + "." + pad(date);
+    return yyyymmdd;
+}
+
 function setConnectedStatus(status) {
-    var conStateLoggingElement = $("#connectionStateLog"); 
+    var conStateLoggingElement = $("#connectionStateLog");
+    status = getDateTime() + " - " + status;
     if(conStateLoggingElement.val() !== '') {
         status = '\n' + status;
     };
