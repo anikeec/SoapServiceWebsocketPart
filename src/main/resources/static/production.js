@@ -53,7 +53,7 @@ function cardProcess(messageType, currentHandlingPtr) {
             sendProductionListRequest();
             state = StateEnum.ST_PRODUCTION_LIST_REQ_SENT;
         } else if(messageType === MessageTypeEnum.REFILL_REQUEST) {
-            sendCardRefillRequest(cardNumberForRefill);
+            sendCardRefillRequest(currentHandlingPtr);
             state = StateEnum.ST_CARD_REFILL_REQ_SENT;
         };
         modifyElementsAccordingToState(state);
@@ -171,7 +171,9 @@ function responseWaitingTimeoutError() {
     }
     if(state === StateEnum.ST_CARD_REFILL_REQ_SENT) {
         state = StateEnum.ST_CARD_REFILLED;                                     //or error
-        mess += '\nRefilling card #' + cardNumberForRefill + ' error.';
+        mess += '\nRefilling card #' 
+                + cardListChecked.cardNumberArray[cardListChecked.handlingPtr] 
+                + ' error.';
         cardListChecked.statusArray[cardListChecked.handlingPtr].html('Error');
         cardRefillNextCard();            
     } else {
@@ -285,16 +287,15 @@ var cardListChecked = {
     ptr: 0,
     handlingPtr: 0,
     cardNumberArray: new Array(),
+    sumArray: new Array(),
     statusArray: new Array()
 };
 
-var cardNumberForRefill = null;
-
 function cardTableHandleCheckedRow(row) {
-    cardListChecked.cardNumberArray[cardListChecked.ptr] = 
-                                row.find('td[name="tdCardNumber"]').text();
-    cardListChecked.statusArray[cardListChecked.ptr] = 
-                                row.find('td[name="tdCardStatus"]');
+    var ptr = cardListChecked.ptr;
+    cardListChecked.cardNumberArray[ptr] = row.find('td[name="tdCardNumber"]').text();
+    cardListChecked.sumArray[ptr] = '10';
+    cardListChecked.statusArray[ptr] = row.find('td[name="tdCardStatus"]');
     cardListChecked.ptr++;
 }
 
@@ -304,6 +305,7 @@ function cadrListRefillingStart() {
     cardListChecked.ptr = 0;
     cardListChecked.handlingPtr = 0;
     cardListChecked.cardNumberArray = new Array();
+    cardListChecked.sumArray = new Array();
     cardListChecked.statusArray = new Array();
 
     tb.find("tr").each( function (index, element) {
@@ -320,8 +322,7 @@ function cadrListRefillingStart() {
 
 function cardRefillingProcessRun(currentHandlingPtr) {
     if(currentHandlingPtr < cardListChecked.statusArray.length) {
-        cardListChecked.statusArray[currentHandlingPtr].html('Preparing for request');
-        cardNumberForRefill = cardListChecked.cardNumberArray[currentHandlingPtr]; 
+        cardListChecked.statusArray[currentHandlingPtr].html('Preparing for request...'); 
         cardProcess(MessageTypeEnum.REFILL_REQUEST, currentHandlingPtr);
         responseWaitingStart(SERVER_QUERY_TIMEOUT);
         return true;
@@ -333,11 +334,11 @@ function cardRefillingProcessRun(currentHandlingPtr) {
 //------------------------------------------------------------------------------
 // card refilling process 
 //------------------------------------------------------------------------------
-function sendCardRefillRequest(cardnumber) {
+function sendCardRefillRequest(currentHandlingPtr) {
     stompClient.send("/app/cardrefill", {}, JSON.stringify({
                 'packetType': 'CardRefillRequest',
-                'cardNumber': cardnumber, 
-                'sum': '10'}));
+                'cardNumber': cardListChecked.cardNumberArray[currentHandlingPtr], 
+                'sum': cardListChecked.sumArray[currentHandlingPtr]}));
     setConnectedStatus("CardRefillRequest sent");
 }
 
