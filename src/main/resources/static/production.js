@@ -278,10 +278,10 @@ function cardListResponseHandle(cardListResponse) {
 
 function insertTableItem(id, cardnumber) {
     var html = '<tr>' 
-            + '<td scope="col" class="col-md-1 col-sm-1">' 
-            + '<input type="checkbox" class="cardCheckbox"  id="cardCheckbox' + cardnumber + '"></td>'
-            + '<td scope="col" class="col-md-4 col-sm-4" name="tdCardNumber">' + cardnumber + '</td>' 
-            + '<td scope="col" class="col-md-7 col-sm-7" name="tdCardStatus">' + '' + '</td>'
+            + '<td scope="col" class="col-md-1 col-sm-1 col-xs-1" name="tdCardCheckbox">' 
+            + '<input type="checkbox" class="cardCheckbox" id="cardCheckbox' + cardnumber + '"></td>'
+            + '<td scope="col" class="col-md-4 col-sm-4 col-xs-4" name="tdCardNumber">' + cardnumber + '</td>' 
+            + '<td scope="col" class="col-md-7 col-sm-7 col-xs-7" name="tdCardStatus">' + '' + '</td>'
             + '</tr>';
     $('#cardTable > tbody:last-child').append(html);
 }
@@ -331,6 +331,7 @@ function insertProductionDropdownItem(id, production) {
 var cardListChecked = {
     ptr: 0,
     handlingPtr: 0,
+    checkbox: new Array(),
     cardNumberArray: new Array(),
     sumArray: new Array(),
     statusArray: new Array()
@@ -338,6 +339,7 @@ var cardListChecked = {
 
 function cardTableHandleCheckedRow(row) {
     var ptr = cardListChecked.ptr;
+    cardListChecked.checkbox[ptr] = row.find('td[name="tdCardCheckbox"]').find('input[type="checkbox"]');
     cardListChecked.cardNumberArray[ptr] = row.find('td[name="tdCardNumber"]').text();
     cardListChecked.sumArray[ptr] = '10';
     cardListChecked.statusArray[ptr] = row.find('td[name="tdCardStatus"]');
@@ -400,6 +402,7 @@ function cardRefillResponseHandle(cardRefillResponse, currentHandlingPtr) {
                 + cardListChecked.cardNumberArray[currentHandlingPtr]
                 + ' refilled succesfully');
         cardListChecked.statusArray[currentHandlingPtr].html('Card refilled');
+        cardListChecked.checkbox[currentHandlingPtr].prop('checked', false);
     } else {
         setConnectedStatus('Card #' 
                 + cardListChecked.cardNumberArray[currentHandlingPtr]
