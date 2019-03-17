@@ -7,7 +7,6 @@ var MessageTypeEnum = {
                 "CARD_LIST_REQUEST":3,
                 "PRODUCTION_LIST_REQUEST":4
             };
-var messageType = MessageTypeEnum.NONE;
 var StateEnum = {
                 "ST_INIT":0,                
                 "ST_CARD_LIST_REQ_SENT":1, 
@@ -27,7 +26,7 @@ openNewSocketConnection = function() {
     setConnectedStatus("Try connect to server");    
 };
 
-function cardProcess(currentHandlingPtr) {
+function cardProcess(messageType, currentHandlingPtr) {
     openNewSocketConnection(); 
     
     stompClient = Stomp.over(sock);
@@ -186,9 +185,8 @@ function responseWaitingTimeoutError() {
 //------------------------------------------------------------------------------
 //card list query
 //------------------------------------------------------------------------------
-function cardListRequest() {
-    messageType = MessageTypeEnum.CARD_LIST_REQUEST;  
-    cardProcess();
+function cardListRequest() { 
+    cardProcess(MessageTypeEnum.CARD_LIST_REQUEST);
     responseWaitingStart(SERVER_QUERY_TIMEOUT);    
 }
 
@@ -243,9 +241,8 @@ function fillTableInit() {
 //------------------------------------------------------------------------------
 //production list query
 //------------------------------------------------------------------------------
-function productionListRequest() {
-    messageType = MessageTypeEnum.PRODUCTION_LIST_REQUEST;  
-    cardProcess();
+function productionListRequest() { 
+    cardProcess(MessageTypeEnum.PRODUCTION_LIST_REQUEST);
     responseWaitingStart(SERVER_QUERY_TIMEOUT);
 }
 
@@ -324,8 +321,9 @@ function cadrListRefillingStart() {
 function cardRefillingProcessRun(currentHandlingPtr) {
     if(currentHandlingPtr < cardListChecked.statusArray.length) {
         cardListChecked.statusArray[currentHandlingPtr].html('Preparing for request');
-        cardNumberForRefill = cardListChecked.cardNumberArray[currentHandlingPtr];
-        cardRefillRequest(currentHandlingPtr);
+        cardNumberForRefill = cardListChecked.cardNumberArray[currentHandlingPtr]; 
+        cardProcess(MessageTypeEnum.REFILL_REQUEST, currentHandlingPtr);
+        responseWaitingStart(SERVER_QUERY_TIMEOUT);
         return true;
     } else {
         return false;
@@ -335,17 +333,11 @@ function cardRefillingProcessRun(currentHandlingPtr) {
 //------------------------------------------------------------------------------
 // card refilling process 
 //------------------------------------------------------------------------------
-function cardRefillRequest(currentHandlingPtr) {
-    messageType = MessageTypeEnum.REFILL_REQUEST;  
-    cardProcess(currentHandlingPtr);  
-}
-
 function sendCardRefillRequest(cardnumber) {
     stompClient.send("/app/cardrefill", {}, JSON.stringify({
                 'packetType': 'CardRefillRequest',
                 'cardNumber': cardnumber, 
                 'sum': '10'}));
-    responseWaitingStart(SERVER_QUERY_TIMEOUT);
 }
 
 function cardRefillResponseHandle(cardRefillResponse, currentHandlingPtr) {
