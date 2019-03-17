@@ -19,6 +19,8 @@ import org.springframework.web.util.HtmlUtils;
 @Controller
 public class MainController {
     
+    private static String ERRORS_NONE = "none";
+    
     @MessageMapping("/cardinfo")
     @SendTo("/topic/greetings")
     public CardInfoResponse getCardInfo(CardInfoRequest request) throws Exception {
@@ -36,11 +38,18 @@ public class MainController {
             //error
         }
         Thread.sleep(1500); // simulated delay
+        if(request.getCardNumber().equals("1212")) {
+            return new CardRefillResponse("Card number " 
+                + HtmlUtils.htmlEscape(request.getCardNumber()) 
+                + " filled succesfully on "
+                + HtmlUtils.htmlEscape(request.getSum())
+                + " grn.", "error");
+        } else 
         return new CardRefillResponse("Card number " 
                 + HtmlUtils.htmlEscape(request.getCardNumber()) 
                 + " filled succesfully on "
                 + HtmlUtils.htmlEscape(request.getSum())
-                + " grn.");
+                + " grn.", ERRORS_NONE);
     }
     
     @MessageMapping("/productionlist")

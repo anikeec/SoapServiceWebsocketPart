@@ -16,7 +16,8 @@ var StateEnum = {
                 "ST_CARD_REFILLED":4,
                 "ST_PRODUCTION_LIST_REQ_SENT":5, 
                 "ST_PRODUCTION_LIST_RECEIVED":6,
-                "ST_ERROR":7 
+                "ST_CARD_LIST_REFILLED":7,
+                "ST_ERROR":8 
             };
 var state = StateEnum.ST_INIT;
 
@@ -119,6 +120,7 @@ function modifyElementsAccordingToState(state) {
         case StateEnum.ST_PRODUCTION_LIST_REQ_SENT:
                                 $("#cardListLoadFromFileButton").prop("disabled", true);
                                 $("#cardListLoadFromDbButton").prop("disabled", true);
+                                $("#cardListRefillButton").prop("disabled", true);
                                 $("#productionListLoadFromDbButton").prop("disabled", true);
                                 $("#productionListSelector").empty();
                                 break;
@@ -126,7 +128,7 @@ function modifyElementsAccordingToState(state) {
                                 $("#cardListResetButton").prop("disabled", false);
                                 $("#cardListLoadFromFileButton").prop("disabled", true);
                                 $("#cardListLoadFromDbButton").prop("disabled", false);
-                                $("#cardListRefillButton").prop("disabled", false);
+                                $("#cardListRefillButton").prop("disabled", true);
                                 $("#productionListLoadFromDbButton").prop("disabled", false);
                                 break;
         case StateEnum.ST_CARD_REFILL_REQ_SENT:
@@ -134,6 +136,9 @@ function modifyElementsAccordingToState(state) {
                                 break;
         case StateEnum.ST_CARD_REFILLED:
                                 
+                                break;
+        case StateEnum.ST_CARD_LIST_REFILLED:
+                                $("#cardListRefillButton").prop("disabled", false);
                                 break;
         case StateEnum.ST_ERROR:
         default:
@@ -295,21 +300,22 @@ function cardTableHandleCheckedRow(row) {
 }
 
 var cardTableHandleRowFunc = function (index, element) {
-    var colSize = $(element).find('td').length;
-    console.log("  Number of cols in row " + (index + 1) + " : " + colSize);
     if($(element).find('input[type="checkbox"]').is(':checked')) {        
         cardTableHandleCheckedRow($(element));
     }
 };
 
-function cadrListRefillingStart() {
+function cadrListRefillingStart() {    
     var tb = $('#cardTable:eq(0) tbody');
     
     cardListChecked.ptr = 0;
     tb.find("tr").each(cardTableHandleRowFunc);                                 //handle all rows
     
     cardListChecked.handlingPtr = 0;
-    cardRefillingProcessRun(cardListChecked.handlingPtr);
+    if(cardRefillingProcessRun(cardListChecked.handlingPtr) === false) {
+        state = StateEnum.ST_CARD_LIST_REFILLED;
+    }
+    modifyElementsAccordingToState(state);
 }
 
 function cardRefillingProcessRun(currentHandlingPtr) {
@@ -317,6 +323,9 @@ function cardRefillingProcessRun(currentHandlingPtr) {
         cardListChecked.statusArray[currentHandlingPtr].html('Preparing for request');
         cardNumberForRefill = cardListChecked.cardNumberArray[currentHandlingPtr];
         cardRefillRequest(currentHandlingPtr);
+        return true;
+    } else {
+        return false;
     }
 }
 
@@ -337,26 +346,26 @@ function sendCardRefillRequest(cardnumber) {
 }
 
 function cardRefillResponseHandle(cardRefillResponse, currentHandlingPtr) {
-    //if answer error {
-    //  state = StateEnum.ST_ERROR;
-    //} else {
+    var errors = JSON.parse(cardRefillResponse.body).errors;
+    if(errors === 'none') {
+        setConnectedStatus("Success");
+        cardListChecked.statusArray[currentHandlingPtr].html('Card refilled');
+    } else {
+        setConnectedStatus("Error: " + errors);
+        cardListChecked.statusArray[currentHandlingPtr].html('Error');
+    }
     state = StateEnum.ST_CARD_REFILLED;
-    clearInterval(sendInterval);
-//    $("#cardInfoTextArea").empty();
-//    $("#cardInfoTextArea").append(JSON.parse(cardRefillResponse.body).cardInfoText);
-    setConnectedStatus("Success");
-    cardListChecked.statusArray[currentHandlingPtr].html('Card refilled');
+    clearInterval(sendInterval);    
     cardDisconnect();    
-    //if success
-//    $( "#cardRefillButton" ).prop("disabled", false);
-        cardRefillNextCard(currentHandlingPtr);
-    //}
+    if(cardRefillNextCard(currentHandlingPtr) === false) {
+        state = StateEnum.ST_CARD_LIST_REFILLED;        
+    }
     modifyElementsAccordingToState(state);    
 }
 
 function cardRefillNextCard(currentHandlingPtr) {
     cardListChecked.handlingPtr = currentHandlingPtr + 1;
-    cardRefillingProcessRun(cardListChecked.handlingPtr);
+    return cardRefillingProcessRun(cardListChecked.handlingPtr);
 }
 
 // card list refilling process end ---------------------------------------------
