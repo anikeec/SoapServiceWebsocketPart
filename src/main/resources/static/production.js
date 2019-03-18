@@ -73,6 +73,9 @@ function cardDisconnect() {
     console.log("Server disconnected");
 }
 
+//------------------------------------------------------------------------------
+//dateTime 
+//------------------------------------------------------------------------------
 function pad(n) {
     return n<10 ? '0'+n : n;
 }
@@ -91,6 +94,9 @@ function getDateTime() {
     return ddmmyyyy + " " + hhmmss;
 }
 
+//------------------------------------------------------------------------------
+//connectedStatus 
+//------------------------------------------------------------------------------
 function setConnectedStatus(status) {
     var conStateLoggingElement = $("#connectionStateLog");
     status = getDateTime() + " - " + status;
