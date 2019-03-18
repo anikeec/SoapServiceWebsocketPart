@@ -213,7 +213,7 @@ function modifyElementsAccordingToState(state) {
 //------------------------------------------------------------------------------
 //wait for response process 
 //------------------------------------------------------------------------------
-const SERVER_QUERY_TIMEOUT = 2000;
+const SERVER_QUERY_TIMEOUT = 4000;
 var sendInterval = null;
 
 function responseWaitingStart(waitTimeout) {
