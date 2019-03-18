@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.apu.soapservicewebsocketpart;
+package com.apu.soapservicewebsocketpart.entity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,24 +12,24 @@ import java.util.List;
  *
  * @author apu
  */
-public class CardListResponse {
+public class ProductionListResponse {
     
     private final String packetType;
-    private List<Card> cardList = new ArrayList<>();
+    private List<String> productionList = new ArrayList<>();
     private String errors;
 
-    public CardListResponse() {
-        this.packetType = PacketType.CARD_LIST_RESPONSE;
+    public ProductionListResponse() {
+        this.packetType = PacketType.PRODUCTION_LIST_RESPONSE;
     }
 
-    public CardListResponse(List<Card> cardList, String errors) {
+    public ProductionListResponse(List<String> productionList, String errors) {
         this();
-        this.cardList = cardList;
+        this.productionList = productionList;
         this.errors = errors;
     }
 
-    public List<Card> getCardList() {
-        return cardList;
+    public List<String> getProductionList() {
+        return productionList;
     }
 
     public String getPacketType() {
