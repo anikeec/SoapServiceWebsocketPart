@@ -67,7 +67,6 @@ function getDateTime() {
     var date = currentDate.getDate();
     var month = currentDate.getMonth(); 
     var year = '' + currentDate.getFullYear();
-    var yyyymmdd = year + "." + pad(month + 1) + "." + pad(date);
     var ddmmyyyy = pad(date) + "." + pad(month + 1) + "." + year.substring(2,4);
     var hour = currentDate.getHours();
     var minute = currentDate.getMinutes();
@@ -89,6 +88,9 @@ function setConnectedStatus(status) {
     conStateLoggingElement.scrollTop(conStateLoggingElement[0].scrollHeight);
 }
 
+//------------------------------------------------------------------------------
+//card info request/response 
+//------------------------------------------------------------------------------
 function cardInfoRequest() { 
     if($("#cardNumberInput").val() === '') {
         setConnectedStatus("ERROR!!! Card number field if empty.");
@@ -98,28 +100,11 @@ function cardInfoRequest() {
     responseWaitingStart(SERVER_QUERY_TIMEOUT);   
 }
 
-function cardRefillRequest() {
-    if($("#refillingSumInput").val() === '') {
-        setConnectedStatus("ERROR!!! Sum field if empty.");
-        return;
-    }
-    cardProcess(MessageTypeEnum.REFILL_REQUEST);  
-    responseWaitingStart(SERVER_QUERY_TIMEOUT);   
-}
-
 function sendCardInfoRequest() {
     stompClient.send("/app/cardinfo", {}, JSON.stringify({
                 'packetType': 'CardInfoRequest',
                 'cardNumber': $("#cardNumberInput").val()}));
     setConnectedStatus("CardInfoRequest sent");
-}
-
-function sendCardRefillRequest() {
-    stompClient.send("/app/cardrefill", {}, JSON.stringify({
-                'packetType': 'CardRefillRequest',
-                'cardNumber': $("#cardNumberInput").val(), 
-                'sum': $("#refillingSumInput").val()}));
-    setConnectedStatus("CardRefillRequest sent");
 }
 
 function cardInfoResponseHandle(cardInfoResponse) {
@@ -136,6 +121,26 @@ function cardInfoResponseHandle(cardInfoResponse) {
     responseWaitingStop();   
     cardDisconnect();
     modifyElementsAccordingToState(state);
+}
+
+//------------------------------------------------------------------------------
+//card refill request/response 
+//------------------------------------------------------------------------------
+function cardRefillRequest() {
+    if($("#refillingSumInput").val() === '') {
+        setConnectedStatus("ERROR!!! Sum field if empty.");
+        return;
+    }
+    cardProcess(MessageTypeEnum.REFILL_REQUEST);  
+    responseWaitingStart(SERVER_QUERY_TIMEOUT);   
+}
+
+function sendCardRefillRequest() {
+    stompClient.send("/app/cardrefill", {}, JSON.stringify({
+                'packetType': 'CardRefillRequest',
+                'cardNumber': $("#cardNumberInput").val(), 
+                'sum': $("#refillingSumInput").val()}));
+    setConnectedStatus("CardRefillRequest sent");
 }
 
 function cardRefillResponseHandle(cardRefillResponse) {
