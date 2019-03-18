@@ -268,5 +268,11 @@ $(document).ready(function () {
     $( "#resetButton" ).click(function() { resetButtonHandler(); });
     $( "#cardInfoRequestButton" ).click(function() { cardInfoRequest(); });
     $( "#cardRefillButton" ).click(function() { cardRefillRequest(); });
+    $("#cardNumberInput").on('keypress', function(e){
+        return e.which !== 13;
+    });
+    $("#refillingSumInput").on('keypress', function(e){
+        return e.which !== 13;
+    }); 
 });
 
