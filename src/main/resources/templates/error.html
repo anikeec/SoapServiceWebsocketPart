@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">      
+<head>
+    <title>SOAP service. Error page.</title>
+    <link rel="stylesheet" type="text/css" href="/webjars/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/login.css}">
+    <link href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" rel="stylesheet" crossorigin="anonymous">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>      
+<body>
+    <div id="main-content" class="container">
+        <div class="row">
+            <div class="col-md-4 col-sm-3 hidden-xs"></div>
+            <div class="col-md-4 col-sm-6 col-xs-12">
+                <div class="text-primary" >
+                    <h2>
+                        <span class="align-middle" style="margin-left:5px;">Error page</span>
+                    </h2>
+                </div>
+                <div>
+                    <span th:if="${message != null}" th:text="${message}"></span>
+                    <span th:if="${message == null}" th:text="${message}">
+                       If you see this page, something went by wrong way :(
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-3 hidden-xs"></div>
+	</div>
+    </div>
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+</body>
+</html>

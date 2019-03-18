@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>SOAP service. Login page.</title>
+    <link rel="stylesheet" type="text/css" href="/webjars/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/login.css}">
+    <link href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" rel="stylesheet" crossorigin="anonymous">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<noscript><h2 style="color: #ff0000; text-align: center;">Seems your browser doesn't support Javascript! 
+    Please enable Javascript and reload this page!</h2></noscript>
+    <div id="main-content" class="container">
+        <div class="row">
+            <div class="col-md-4 col-sm-3 hidden-xs"></div>
+            <div class="col-md-4 col-sm-6 col-xs-12">
+                <form class="form-signin" th:action="@{/login}" method="POST">
+                    <h3 class="form-signin-heading">
+                        Please sign in
+                    </h3>
+                    <label for="inputLogin" class="sr-only">
+                        Email
+                    </label>
+                    <input type="text" id="email" name="email" class="form-control" 
+                           th:placeholder="Email" required autofocus>
+                    <label for="password" class="sr-only">
+                        Password
+                    </label>
+                    <input type="password" id="password" name="password" class="form-control" 
+                           th:placeholder="Password" required>
+                    <div class="checkbox">
+                      <label>
+                          <input type="checkbox" value="remember-me" disabled=""> Remember me
+                      </label>
+                    </div>
+                    <button class="btn btn-lg btn-primary btn-block" name="Submit" type="submit" value="Login">
+                        Sign in
+                    </button>
+                    <div class="alert alert-danger fade in" style="margin-top: 10px;" th:if="${param.error}">
+                        <a href="#" class="close" data-dismiss="alert">&times;</a>
+                        <strong>Error!</strong> Login or Password invalid, please verify.
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-4 col-sm-3 hidden-xs"></div>
+        </div>       
+    </div>
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+</body>
+</html>
