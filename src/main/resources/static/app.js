@@ -264,15 +264,45 @@ function responseWaitingTimeoutError() {
 }
 //wait for response process end ------------------------------------------------
 
+function checkLogged() {
+    var cookieValue = $.cookie('loggedStatus');
+    if ((cookieValue !== null) && (cookieValue !== undefined)) {
+        return true;
+    } else {
+        window.location = '/logout';        
+    }
+    return false;
+}
+
 $(document).ready(function () {
+    $.cookie('loggedStatus','true'); 
+    
+    $("#logoutLink").click(function() {
+        $.removeCookie('loggedStatus');
+    });
+    
     $("form").on('submit', function (e) {
         e.preventDefault();
     });
     state = StateEnum.ST_INIT;
     modifyElementsAccordingToState(state);
-    $( "#resetButton" ).click(function() { resetButtonHandler(); });
-    $( "#cardInfoRequestButton" ).click(function() { cardInfoRequest(); });
-    $( "#cardRefillButton" ).click(function() { cardRefillRequest(); });
+    
+    $( "#resetButton" ).click(function() { 
+        if(checkLogged() === true) {
+            resetButtonHandler();
+        } 
+    });
+    $( "#cardInfoRequestButton" ).click(function() { 
+        if(checkLogged() === true) {
+            cardInfoRequest();
+        } 
+    });
+    $( "#cardRefillButton" ).click(function() { 
+        if(checkLogged() === true) {
+            cardRefillRequest();
+        } 
+    });
+    
     $("#cardNumberInput").on('keypress', function(e){
         return e.which !== 13;
     });

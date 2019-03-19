@@ -58,6 +58,7 @@ function cardProcess(messageType, currentHandlingPtr) {
         modifyElementsAccordingToState(state);
     }, function(error) {
         console.log('StompClient: ' + error);
+        cardDisconnect();
         //I have to handle this message
     });
 }
@@ -439,20 +440,52 @@ function cardRefillNextCard(currentHandlingPtr) {
 
 // card list refilling process end ---------------------------------------------
 
+function checkLogged() {
+    var cookieValue = $.cookie('loggedStatus');
+    if ((cookieValue !== null) && (cookieValue !== undefined)) {
+        return true;
+    } else {
+        window.location = '/logout';        
+    }
+    return false;
+}
+
 $(document).ready(function () {
+    $.cookie('loggedStatus','true'); 
+    
+    $("#logoutLink").click(function() {
+        $.removeCookie('loggedStatus');
+    });
+    
     $("form").on('submit', function (e) {
         e.preventDefault();
     });
+    
     state = StateEnum.ST_INIT;
     modifyElementsAccordingToState(state);
-    $( "#cardListResetButton" ).click(function() { resetButtonHandler(); });
     
     $("#selectAllCardsCheckbox").click(function () {
         $(".cardCheckbox").prop('checked', $(this).prop('checked'));
+    });    
+    $( "#cardListResetButton" ).click(function() { 
+        if(checkLogged() === true) {
+            resetButtonHandler(); 
+        }
     });
-    
-    $( "#cardListLoadFromDbButton" ).click(function() { cardListRequest(); });
-    $( "#productionListLoadFromDbButton" ).click(function() { productionListRequest(); });
-    $( "#cardListRefillButton" ).click(function() { cadrListRefillingStart(); });
+    $( "#productionListLoadFromDbButton" ).click(function() { 
+        if(checkLogged() === true) {
+            productionListRequest(); 
+        }
+    });
+    $( "#cardListLoadFromDbButton" ).click(function() { 
+        if(checkLogged() === true) {
+            cardListRequest();  
+        }
+    });    
+    $( "#cardListRefillButton" ).click(function() { 
+        if(checkLogged() === true) {
+            cadrListRefillingStart(); 
+        }
+    });    
 });
 
