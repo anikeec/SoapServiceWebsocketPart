@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.apu.soapservicewebsocketpart.controller;
+package com.apu.soapservicewebsocketpart.MVC.config;
 
 import com.apu.soapservicewebsocketpart.security.interceptor.LoggerInterceptor;
 import org.springframework.context.annotation.Configuration;

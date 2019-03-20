@@ -26,7 +26,7 @@ var mustStopFlag = false;
 
 
 openNewSocketConnection = function() {  
-    sock = new SockJS('/gs-guide-websocket');    
+    sock = new SockJS('/refill_ws_endpoint');    
     setConnectedStatus("Try connect to server");    
 };
 
@@ -36,7 +36,7 @@ function cardProcess(messageType, currentHandlingPtr) {
     stompClient = Stomp.over(sock);
     stompClient.connect({}, function (frame) {
         console.log('StompClient: ' + frame);  
-        stompClient.subscribe('/topic/greetings', function (response) {
+        stompClient.subscribe('/topic/refilling', function (response) {
             if(messageType === MessageTypeEnum.CARD_LIST_REQUEST) {
                 cardListResponseHandle(response);
             } else if(messageType === MessageTypeEnum.PRODUCTION_LIST_REQUEST) {

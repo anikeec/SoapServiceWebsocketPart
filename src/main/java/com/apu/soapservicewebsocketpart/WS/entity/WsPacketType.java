@@ -3,13 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.apu.soapservicewebsocketpart.entity;
+package com.apu.soapservicewebsocketpart.WS.entity;
 
 /**
  *
  * @author apu
  */
-public class PacketType {
+public class WsPacketType {
     
     public static String CARD_INFO_REQUEST = "CardInfoRequest";
     public static String CARD_INFO_RESPONSE = "CardInfoResponse";

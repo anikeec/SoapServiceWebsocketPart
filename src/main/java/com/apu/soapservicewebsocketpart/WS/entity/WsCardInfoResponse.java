@@ -3,23 +3,23 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.apu.soapservicewebsocketpart.entity;
+package com.apu.soapservicewebsocketpart.WS.entity;
 
 /**
  *
  * @author apu
  */
-public class CardRefillResponse {
+public class WsCardInfoResponse {
     
     private final String packetType;
     private String cardInfoText;
     private String errors;
 
-    public CardRefillResponse() {
-        this.packetType = PacketType.CARD_REFILL_RESPONSE;
+    public WsCardInfoResponse() {
+        this.packetType = WsPacketType.CARD_INFO_RESPONSE;
     }
 
-    public CardRefillResponse(String cardInfoText, String errors) {
+    public WsCardInfoResponse(String cardInfoText, String errors) {
         this();
         this.cardInfoText = cardInfoText;
         this.errors = errors;

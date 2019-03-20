@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.apu.soapservicewebsocketpart.config;
+package com.apu.soapservicewebsocketpart.WS.config;
 
 import com.apu.soapservicewebsocketpart.security.HandshakeInterceptor;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +28,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/gs-guide-websocket").withSockJS()
+        registry.addEndpoint("/refill_ws_endpoint").withSockJS()
                 .setInterceptors(new HandshakeInterceptor());
     }
     

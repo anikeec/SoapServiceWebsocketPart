@@ -13,7 +13,7 @@ var StateEnum = {"ST_INIT":0,
 var state = StateEnum.ST_INIT;
 
 openNewSocketConnection = function() {  
-    sock = new SockJS('/gs-guide-websocket');    
+    sock = new SockJS('/refill_ws_endpoint');    
     setConnectedStatus("Try connect to server");    
 };
 
@@ -23,7 +23,7 @@ function cardProcess(messageType) {
     stompClient = Stomp.over(sock);
     stompClient.connect({}, function (frame) {
         console.log('StompClient: ' + frame);  
-        stompClient.subscribe('/topic/greetings', function (response) {
+        stompClient.subscribe('/topic/refilling', function (response) {
             if(messageType === MessageTypeEnum.CARD_INFO_REQUEST) {
                 cardInfoResponseHandle(response);
             } else if(messageType === MessageTypeEnum.REFILL_REQUEST) {

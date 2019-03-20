@@ -3,28 +3,28 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.apu.soapservicewebsocketpart.entity;
+package com.apu.soapservicewebsocketpart.WS.entity;
 
 /**
  *
  * @author apu
  */
-public class CardInfoRequest {
+public class WsCardListRequest {
     
     private final String packetType;
-    private String cardNumber;
+    private String production;
 
-    public CardInfoRequest() {
-        this.packetType = PacketType.CARD_INFO_REQUEST;
+    public WsCardListRequest() {
+        this.packetType = WsPacketType.CARD_LIST_REQUEST;
     }
 
-    public CardInfoRequest(String cardNumber) {
+    public WsCardListRequest(String production) {
         this();
-        this.cardNumber = cardNumber;
+        this.production = production;
     }
 
-    public String getCardNumber() {
-        return cardNumber;
+    public String getProduction() {
+        return production;
     }
 
     public String getPacketType() {

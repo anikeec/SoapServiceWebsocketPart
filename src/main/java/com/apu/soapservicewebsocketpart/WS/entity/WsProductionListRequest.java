@@ -3,18 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.apu.soapservicewebsocketpart.entity;
+package com.apu.soapservicewebsocketpart.WS.entity;
 
 /**
  *
  * @author apu
  */
-public class ProductionListRequest {
+public class WsProductionListRequest {
     
     private final String packetType;
 
-    public ProductionListRequest() {
-        this.packetType = PacketType.PRODUCTION_LIST_REQUEST;
+    public WsProductionListRequest() {
+        this.packetType = WsPacketType.PRODUCTION_LIST_REQUEST;
     }
 
     public String getPacketType() {

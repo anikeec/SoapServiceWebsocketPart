@@ -3,21 +3,24 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.apu.soapservicewebsocketpart.entity;
+package com.apu.soapservicewebsocketpart.WS.entity;
 
 /**
  *
  * @author apu
  */
-public class CardRefilling {
+public class WsCardRefillRequest {
     
+    private final String packetType;
     private String cardNumber;
     private String sum;
 
-    public CardRefilling() {
+    public WsCardRefillRequest() {
+        this.packetType = WsPacketType.CARD_REFILL_REQUEST;
     }
 
-    public CardRefilling(String cardNumber, String sum) {
+    public WsCardRefillRequest(String cardNumber, String sum) {
+        this();
         this.cardNumber = cardNumber;
         this.sum = sum;
     }
@@ -28,6 +31,10 @@ public class CardRefilling {
 
     public String getSum() {
         return sum;
-    }    
+    }
+
+    public String getPacketType() {
+        return packetType;
+    }
     
 }
