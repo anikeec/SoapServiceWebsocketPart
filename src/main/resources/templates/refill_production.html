@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Hello WebSocket</title>
-    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/main.css" rel="stylesheet">
+    <title>Refilling service. Productions.</title>
+    <link rel="stylesheet" type="text/css" href="/webjars/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/refill.css}">
     <link href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" rel="stylesheet" crossorigin="anonymous">    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
@@ -27,8 +27,8 @@
               <!-- Collect the nav links, forms, and other content for toggling -->
               <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                  <li><a href="index.html">Refill</a></li>
-                  <li class="active"><a href="production.html">Production<span class="sr-only">(current)</span></a></li>
+                  <li><a href="/money/card">Refill</a></li>
+                  <li class="active"><a href="/money/production">Production<span class="sr-only">(current)</span></a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                   <li><a href="/logout" id="logoutLink"><span class="glyphicon glyphicon-log-out"></span> Exit</a></li>
@@ -102,6 +102,6 @@
     <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
     <script src="/webjars/sockjs-client/sockjs.min.js"></script>
     <script src="/webjars/stomp-websocket/stomp.min.js"></script>
-    <script src="/production.js"></script>
+    <script th:src="@{/js/refill_production.js}"></script>
 </body>
 </html>
