@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 
 @EnableResourceServer
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
-public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
+public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     
     private static final String RESOURCE_ID = "restservice";
 

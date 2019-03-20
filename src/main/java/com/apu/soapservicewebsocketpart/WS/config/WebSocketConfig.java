@@ -5,7 +5,7 @@
  */
 package com.apu.soapservicewebsocketpart.WS.config;
 
-import com.apu.soapservicewebsocketpart.security.HandshakeInterceptor;
+import com.apu.soapservicewebsocketpart.security.interceptor.HandshakeInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;

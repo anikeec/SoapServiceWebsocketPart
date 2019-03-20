@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.apu.soapservicewebsocketpart.security;
+package com.apu.soapservicewebsocketpart.security.interceptor;
 
 import java.util.Map;
 import org.springframework.http.server.ServerHttpRequest;
